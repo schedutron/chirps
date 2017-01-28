@@ -1,0 +1,23 @@
+{
+  "name": "sambot",
+  "version": "1.0.0",
+  "description": "A novice Twitter bot for my own Twitter handle",
+  "main": "useful_twitter.py",
+  "scripts": {
+    "test": "python useful_twitter.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.heroku.com/schedutron.git"
+  },
+  "keywords": [
+    "twitter",
+    "bot"
+  ],
+  "author": "Saurabh Chaturvedi",
+  "license": "ISC",
+  "dependencies": {
+    "timer": "0.0.2",
+    "twitter": "^1.7.0"
+  }
+}

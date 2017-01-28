@@ -1,0 +1,73 @@
+
+this package provides a utility function which unifies the setTimeout and 
+setInterval functions. 
+
+It also provides a comfortable way to chain multiple
+setTimeouts with different timeouts and even a finally setInterval with
+the same callback. 
+
+An additional feature is the auto interval function which applies
+a simple setInterval which triggers at event time slots, ie
+if you call the timer.auto function with an interval of 15*60*1000 
+(15 minutes) your callback will be triggered at 00:15:00, 00:30:00, and so on.
+
+
+
+USAGE EXAMPLE (JAVASCRIPT):
+	
+	// simple setTimeout
+	// same as setTimeout( cb, 200);
+	timer(200, cb);
+	
+	
+	// setTimeout with same callback after 200ms and after 400ms
+	// the second array element is also 200ms because it is set up after the first one (200ms+200ms = 400ms)
+	timer( [200,200], cb );
+	// same as 
+	// setTimeout( 200, cb );
+	// setTimeout( 400, cb );
+
+	// simple setInterval
+	timer.interval(2000,cb);
+	// same as setInterval(cb,2000);
+	
+	// setting up a interval after a timeout
+	timer(500,2000,cb);
+	// this one will trigger cb after:
+	//  500ms, 2500ms, 4500ms, 6500ms, ...
+	
+	
+	// auto slot a interval (for example if you want your callback to be triggered at 00:15:00, 00:30:00, ..)
+	timer.auto(15*60*1000, cb);
+	
+	
+	
+	
+	// clearing a timeout:
+	o = timer(500,cb);
+	o.clear();
+	
+	// if you use the clear() function on a timer with multiple timeouts or intevals, ALL of them will be cleared,
+	// so your callback won't be triggered any more
+	
+	
+USAGE EXAMPLE (COFFEESCRIPT):
+	
+	# with coffeescript the utility functions are even more handy
+	
+	timer 200, -> console.log 'hello'
+	
+	timer [500,200], -> console.log 'hello after 500ms and 700ms'
+	
+	# BONG every 30min at even time slots (0:00, 0:30, ..)
+	{clear} = timer.auto 30*60*1000, -> console.log 'BONG'
+	# end the BONG interval after 5h
+	timer 5*60*60*1000, clear
+	
+	
+	
+
+
+QUESTIONS or feedback?
+	you are welcome, send me an email at sieber.m@gmail.com
+	
