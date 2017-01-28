@@ -19,5 +19,6 @@
   "dependencies": {
     "timer": "0.0.2",
     "twitter": "^1.7.0"
-  }
+  },
+  "devDependencies": {}
 }

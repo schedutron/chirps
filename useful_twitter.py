@@ -111,9 +111,9 @@ def print_tweet(tweet):
     print hashtags
 
 while 1:
-    tweets = t.search.tweets(q="#heroku", count=199)["statuses"]
+    tweets = t.search.tweets(q="#python", count=199)["statuses"]
     for tweet in tweets:
         retweet(tweet)
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
-        time.sleep(15)
+        time.sleep(5)
