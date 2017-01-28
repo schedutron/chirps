@@ -1,5 +1,5 @@
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time
+import webbrowser, time, random
 
 # Variables that contain the user credentials to access Twitter API
 
@@ -111,9 +111,15 @@ def print_tweet(tweet):
     print hashtags
 
 while 1:
-    tweets = t.search.tweets(q="#python", count=199)["statuses"]
+    tags = ["heroku", "angularjs", "nodejs", "java", "javascript", "python"]
+    tweets = t.search.tweets(q=random.choice(tags), count=199)["statuses"]
     for tweet in tweets:
         retweet(tweet)
+        fav_tweet(tweet)
+        try:
+            t.friendships.create(_id=tweet["user"]["id"])
+        except:
+            pass
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
-        time.sleep(5)
+        time.sleep(30)
