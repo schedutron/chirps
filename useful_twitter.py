@@ -1,5 +1,5 @@
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, re
+import webbrowser, time, random, re
 
 offensive = re.compile(
     r"\b(deaths?|dead(ly)?|die(s|d)?|hurts?|(sex(ual(ly)?)?|child)[ -]?(abused?|trafficking|"
@@ -113,7 +113,7 @@ def unfollow(iden):
             success += 1
         except:
             pass
-        print "Unfollowed %i people." % success
+        #print "Unfollowed %i people." % success
 
 def print_tweet(tweet):
     print tweet["user"]["name"]
@@ -129,21 +129,26 @@ def print_tweet(tweet):
 keywords = open("keywords.txt", "r")
 words = [word.strip() for word in keywords.readlines()]
 keywords.close()
-query = " OR ".join(words)
+
 while 1:
-    tweets = t.search.tweets(q=query, count=199, lang="en")["statuses"]
-    friends = t.friends.ids(screen_name="arichduvet", count=199)["ids"]
-    friends.reverse()
+    tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
+    fr = t.friends.ids(screen_name="arichduvet", count=199)["ids"]
+    fr.reverse()
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
-                retweet(tweet)
-                fav_tweet(tweet)
-                try:
-                    t.friendships.create(_id=tweet["user"]["id"])
-                    unfollow(friends.pop())
-                except:
-                    pass
+                prev_follow = tweet["user"]["following"]
+                t.friendships.create(_id=tweet["user"]["id"])
+                now_follow = t.users.lookup(user_id=tweet["user"]["id"])[0]["following"]
+                if prev_follow==0 and now_follow==1:
+                    unfollow(fr.pop())
+                if "retweeted_status" in tweet:
+                    op = tweet["retweeted_status"]["user"]
+                    now_follow = op["following"]
+                    t.friendships.create(_id=op["id"])
+                    now_follow = t.users.lookup(user_id=op["id"])[0]["following"]
+                    if prev_follow==0 and now_follow==1:
+                        unfollow(fr.pop())
         except:
             pass
     #search_and_fav("python programming", 199)
