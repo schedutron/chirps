@@ -1,5 +1,5 @@
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, random, re
+import webbrowser, time, re
 
 offensive = re.compile(
     r"\b(deaths?|dead(ly)?|die(s|d)?|hurts?|(sex(ual(ly)?)?|child)[ -]?(abused?|trafficking|"
@@ -106,15 +106,14 @@ def search_and_follow(text, num): #improve this! Inaccurate feedback!
                      pass
      print "Followed %i people." % success
 
-def unfollow(ids):
-    success = 0
-    for iden in ids:
+def unfollow(iden):
+        success = 0
         try:
             t.friendships.destroy(_id=iden)
             success += 1
         except:
             pass
-    print "Unfollowed %i people." % success
+        print "Unfollowed %i people." % success
 
 def print_tweet(tweet):
     print tweet["user"]["name"]
@@ -127,9 +126,14 @@ def print_tweet(tweet):
         hashtags.append(h["text"])
     print hashtags
 
+keywords = open("keywords.txt", "r")
+words = [word.strip() for word in keywords.readlines()]
+keywords.close()
+query = " OR ".join(words)
 while 1:
-    tags = ["heroku", "angularjs", "nodejs", "java", "javascript", "python"]
-    tweets = t.search.tweets(q=random.choice(tags), count=199)["statuses"]
+    tweets = t.search.tweets(q=query, count=199, lang="en")["statuses"]
+    friends = t.friends.ids(screen_name="arichduvet", count=199)["ids"]
+    friends.reverse()
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
@@ -141,6 +145,7 @@ while 1:
                     pass
         except:
             pass
+        unfollow(friends.pop())
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
-        time.sleep(61)
+        time.sleep(31)
