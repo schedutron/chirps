@@ -141,11 +141,11 @@ while 1:
                 fav_tweet(tweet)
                 try:
                     t.friendships.create(_id=tweet["user"]["id"])
+                    unfollow(friends.pop())
                 except:
                     pass
         except:
             pass
-        unfollow(friends.pop())
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
         time.sleep(31)
