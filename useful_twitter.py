@@ -1,5 +1,5 @@
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, random, re
+import webbrowser, time, random, re, urllib
 
 offensive = re.compile(
     r"\b(deaths?|dead(ly)?|die(s|d)?|hurts?|(sex(ual(ly)?)?|child)[ -]?(abused?|trafficking|"
@@ -126,22 +126,20 @@ def print_tweet(tweet):
         hashtags.append(h["text"])
     print hashtags
 
-keywords = open("keywords.txt", "r")
-words = [word.strip() for word in keywords.readlines()]
-keywords.close()
-
 while 1:
+    keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
+    words = [word.strip() for word in keywords.readlines()]
+    keywords.close()
     tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
     fr = t.friends.ids(screen_name="arichduvet", count=199)["ids"]
     fr.reverse()
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
-                #print_tweet(tweet)
-                #print "Heart =",
-                fav_tweet(tweet)
-                #print "Retweet =",
-                retweet(tweet)
+                print_tweet(tweet)
+                print
+                print "Heart =", fav_tweet(tweet)
+                print "Retweet =", retweet(tweet)
                 prev_follow = tweet["user"]["following"]
                 t.friendships.create(_id=tweet["user"]["id"])
                 now_follow = t.users.lookup(user_id=tweet["user"]["id"])[0]["following"]
@@ -154,6 +152,7 @@ while 1:
                     now_follow = t.users.lookup(user_id=op["id"])[0]["following"]
                     if prev_follow==0 and now_follow==1:
                         unfollow(fr.pop())
+                print
         except:
             pass
     #search_and_fav("python programming", 199)

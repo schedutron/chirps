@@ -8,3 +8,5 @@ programming
 twilio
 android
 pygame
+SQL
+dbms
