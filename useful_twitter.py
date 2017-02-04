@@ -160,4 +160,4 @@ while 1:
             pass
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
-        time.sleep(31)
+        time.sleep(61)
