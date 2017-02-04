@@ -137,6 +137,8 @@ while 1:
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
+                fav_tweet(tweet)
+                retweet(tweet)
                 prev_follow = tweet["user"]["following"]
                 t.friendships.create(_id=tweet["user"]["id"])
                 now_follow = t.users.lookup(user_id=tweet["user"]["id"])[0]["following"]
