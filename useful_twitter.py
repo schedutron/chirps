@@ -137,7 +137,10 @@ while 1:
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
+                #print_tweet(tweet)
+                #print "Heart =",
                 fav_tweet(tweet)
+                #print "Retweet =",
                 retweet(tweet)
                 prev_follow = tweet["user"]["following"]
                 t.friendships.create(_id=tweet["user"]["id"])
