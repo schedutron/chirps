@@ -135,7 +135,6 @@ while 1:
     keywords.close()
     tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
     fr = t.friends.ids(screen_name="arichduvet", count=199)["ids"]
-    fr.reverse()
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
