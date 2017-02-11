@@ -142,18 +142,21 @@ while 1:
                 print
                 print "Heart =", fav_tweet(tweet)
                 print "Retweet =", retweet(tweet)
-                #prev_follow = tweet["user"]["following"]
+                prev_follow = tweet["user"]["following"]
                 t.friendships.create(_id=tweet["user"]["id"])
-                #now_follow = t.users.lookup(user_id=tweet["user"]["id"])[0]["following"]
-                #if prev_follow==0 and now_follow==1:
-                #    unfollow(fr.pop())
+                now_follow = t.users.lookup(user_id=tweet["user"]["id"])[0]["following"]
+                if prev_follow==0 and now_follow==1:
+                    time.sleep(11)
+                    unfollow(fr.pop())
                 if "retweeted_status" in tweet:
                     op = tweet["retweeted_status"]["user"]
-                #    now_follow = op["following"]
+                    prev_follow = op["following"]
+                    time.sleep(11)
                     t.friendships.create(_id=op["id"])
-                #    now_follow = t.users.lookup(user_id=op["id"])[0]["following"]
-                #    if prev_follow==0 and now_follow==1:
-                #        unfollow(fr.pop())
+                    now_follow = t.users.lookup(user_id=op["id"])[0]["following"]
+                    if prev_follow==0 and now_follow==1:
+                        time.sleep(11)
+                        unfollow(fr.pop())
                 print
         except:
             pass

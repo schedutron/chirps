@@ -40,7 +40,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/binaryboy/Desktop/pagerank3/venv"
+VIRTUAL_ENV="/Users/binaryboy/Dropbox/Kode/Coursera/Python/Using Databases with Python/pagerank3/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
