@@ -129,7 +129,7 @@ def print_tweet(tweet):
 #confused stuff happened during the initialization at Heroku on Saturday, 4 Feb, 2017: around 2 pm.
 #see the confused_stuff snap.
 #By the way, confused stuff happens in the middle as well.
-'''
+
 while 1:
     keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
     words = [word.strip() for word in keywords.readlines()]
@@ -164,4 +164,3 @@ while 1:
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
         time.sleep(61)
-'''
