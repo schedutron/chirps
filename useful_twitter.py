@@ -132,7 +132,7 @@ def print_tweet(tweet):
 #see the confused_stuff snap.
 #By the way, confused stuff happens in the middle as well.
 
-'''while 1:
+while 1:
     keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
     words = [word.strip() for word in keywords.readlines()]
     keywords.close()
@@ -165,4 +165,4 @@ def print_tweet(tweet):
             pass
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
-        time.sleep(61)'''
+        time.sleep(61)
