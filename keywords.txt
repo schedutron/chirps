@@ -10,4 +10,7 @@ android
 pygame
 SQL
 dbms
-dropbox
+pagerank
+ramanujan
+asme
+cybercode
