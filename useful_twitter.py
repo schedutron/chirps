@@ -136,7 +136,7 @@ while 1:
     keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
     words = [word.strip() for word in keywords.readlines()]
     keywords.close()
-    tweets = t.search.tweets(q=' OR '.join(keywords) +' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
+    tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
     fr = t.friends.ids(screen_name="arichduvet", count=199)["ids"]
     for tweet in tweets:
         try:
