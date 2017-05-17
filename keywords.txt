@@ -1,12 +1,7 @@
-heroku
 angularjs
 nodejs
-java
-javascript
+reactnative
 python
-programming
-twilio
-android
 pygame
 SQL
 dbms
@@ -14,3 +9,21 @@ pagerank
 ramanujan
 asme
 cybercode
+computerphile
+numberphile
+objective c
+artificial intelligence
+machine learning
+haskell
+d3js
+php
+css
+raspberrypi
+arduino
+computer vision
+scala
+einstein
+feynman
+fortran
+cobol
+deep learning
