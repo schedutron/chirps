@@ -161,8 +161,6 @@ while 1:
     keywords.close()
     tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
     fr = t.friends.ids(screen_name="arichduvet")["ids"]
-    if not news:
-        news = find_news()
     if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio.
                        #Using 5990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
                        #manually even after a bot crash.
@@ -192,6 +190,9 @@ while 1:
                     #    time.sleep(11)
                     #    unfollow(fr.pop())
                 print
+
+                if not news:
+                    news = find_news()
                 item = news.pop()
                 print "Scraped: ", item
                 t.statuses.update(status=item)
