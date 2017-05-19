@@ -1,5 +1,6 @@
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, random, re, urllib
+import webbrowser, time, random, re, urllib, requests, HTMLParser
+parser = HTMLParser.HTMLParser() #used in find_news
 
 offensive = re.compile(
     r"\b(deaths?|dead(ly)?|die(s|d)?|hurts?|(sex(ual(ly)?)?|child)[ -]?(abused?|trafficking|"
@@ -128,16 +129,40 @@ def print_tweet(tweet):
         hashtags.append(h["text"])
     print hashtags
 
+def find_news():
+    nyTech = requests.get('https://nytimes.com/section/technology')
+    latest_patt = r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+    latest = re.search(latest_patt, nyTech.text)
+    news = re.findall(r'(?s)<h2.*?>(.*?)</h2>', latest.group(1))
+    news = [item.strip() for item in list(set(news))]
+    for i in range(len(news)):
+        item = news[i]
+        if item.startswith('Daily Report: '):
+            news[i] = item[14:]
+    tv = requests.get('https://theverge.com', headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'})
+    feed_patt = r'(?s)<div class="c-compact-river">(.*?)<div class="l-col__sidebar"'
+    bunches = re.findall(feed_patt, tv.text)
+    verge_news = []
+    for cluster in bunches:
+        snippets = re.findall(r'<h2.*?><a.*>(.*?)</a></h2>', cluster)
+        verge_news.extend(snippets)
+    for item in verge_news:
+        news.append(parser.unescape(item))
+    random.shuffle(news) #to bring a feel of randomness
+    return news
 #confused stuff happened during the initialization at Heroku on Saturday, 4 Feb, 2017: around 2 pm.
 #see the confused_stuff snap.
 #By the way, confused stuff happens in the middle as well.
 
+news = []
 while 1:
     keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
     words = [word.strip() for word in keywords.readlines()]
     keywords.close()
     tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
     fr = t.friends.ids(screen_name="arichduvet")["ids"]
+    if not news:
+        news = find_news()
     if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio.
                        #Using 5990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
                        #manually even after a bot crash.
@@ -169,6 +194,8 @@ while 1:
                 print
         except:
             pass
+
+        t.statuses.update(status=news.pop())
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
         time.sleep(61)
