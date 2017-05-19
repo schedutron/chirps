@@ -192,10 +192,12 @@ while 1:
                     #    time.sleep(11)
                     #    unfollow(fr.pop())
                 print
+        item = news.pop()
+        print "Scraped: ", item
+        t.statuses.update(status=item)
         except:
             pass
 
-        t.statuses.update(status=news.pop())
     #search_and_fav("python programming", 199)
     #t.statuses.update(status="Check check! Heroku testing! #python")
         time.sleep(61)
