@@ -192,9 +192,9 @@ while 1:
                     #    time.sleep(11)
                     #    unfollow(fr.pop())
                 print
-        item = news.pop()
-        print "Scraped: ", item
-        t.statuses.update(status=item)
+                item = news.pop()
+                print "Scraped: ", item
+                t.statuses.update(status=item)
         except:
             pass
 
