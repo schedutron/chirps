@@ -1,20 +1,12 @@
-angularjs
-nodejs
-reactnative
 python
 pygame
 SQL
-dbms
-pagerank
 ramanujan
 asme
-cybercode
 computerphile
 numberphile
-objective c
 artificial intelligence
 machine learning
-haskell
 d3js
 php
 css
@@ -24,6 +16,24 @@ computer vision
 scala
 einstein
 feynman
-fortran
-cobol
 deep learning
+multithreading
+parallel computing
+pycnic
+django
+cherrypy
+turbogears2
+apache framework
+watson-framework
+reahl
+webcore
+morepath
+special relativity
+general relativity
+GitHub
+git
+json
+xml
+python socket
+matplotlib
+scikit-learn
