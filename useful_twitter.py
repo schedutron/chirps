@@ -159,17 +159,19 @@ while 1:
     keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
     words = [word.strip() for word in keywords.readlines()]
     keywords.close()
-    tweets = t.search.tweets(q=random.choice(words)+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
-    '''fr = t.friends.ids(screen_name="arichduvet")["ids"]
-    if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio.
-                       #Using 5990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
-                       #manually even after a bot crash.
-        for i in xrange(2500): #probably this is the upper limit of mass unfollow in one go
-            unfollow(fr.pop())'''
+    word = random.choice(words)
+    tweets = t.search.tweets(q=word+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
+    #fr = t.friends.ids(screen_name="arichduvet")["ids"]
+    #if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio.
+    #                   #Using 5990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
+    #                   #manually even after a bot crash.
+    #    for i in xrange(2500): #probably this is the upper limit of mass unfollow in one go
+    #        unfollow(fr.pop())
 
     for tweet in tweets:
         try:
             if re.search(offensive, tweet["text"]) == None:
+                print "Search tag:", word
                 print_tweet(tweet)
                 print
                 print "Heart =", fav_tweet(tweet)
@@ -194,8 +196,9 @@ while 1:
                 if not news:
                     news = find_news()
                 item = news.pop()
-                print "Scraped: ", item
-                t.statuses.update(status=item)
+                if not re.search(r'(?i)this|follow|search articles', item):
+                    print "Scraped: ", item
+                    t.statuses.update(status=item)
         except:
             pass
 

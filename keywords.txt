@@ -31,7 +31,6 @@ morepath
 special relativity
 general relativity
 GitHub
-git
 json
 xml
 python socket
