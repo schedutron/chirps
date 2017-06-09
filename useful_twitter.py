@@ -156,11 +156,27 @@ def find_news():
 
 news = []
 while 1:
-    keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0")
+    keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/80cykq35nyh8tse/keywords.txt?dl=0") #keep keywords ~ 36, no more. For more, use another search call
     words = [word.strip() for word in keywords.readlines()]
     keywords.close()
-    word = random.choice(words)
-    tweets = t.search.tweets(q=word+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
+
+    prev = 0
+    partitions = []
+    size = 15
+    for i in xrange(0, len(words), 15):
+        partitions.append(words[i:i+15])
+
+    #times = len(words) / 20 #search API can handle around 20 keywords in a query
+
+    #word = random.choice(words)
+    #tweets = t.search.tweets(q=word+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
+    #query = ' OR '.join(words) # + ') -from:arichduvet' no need for -from:arichduvet -- without it, retweets aren't shown, so no issue of searching for my own retweets
+    tweets = []
+    #c = 199 / len(partitions) maybe implemented later
+    for partition in partitions:
+        query = ' OR '.join(partition)
+        tweets += t.search.tweets(q=query, count=199, lang="en")["statuses"]
+    #tweets = t.search.tweets(q=query, count=199, lang="en")["statuses"]
     fr = t.friends.ids(screen_name="arichduvet")["ids"]
     if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio.
                        #Using 5990 instead of 5000 for 'safety', so that I'm able to follow some interesting people

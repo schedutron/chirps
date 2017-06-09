@@ -22,12 +22,8 @@ parallel computing
 pycnic
 django
 cherrypy
-turbogears2
 apache framework
-watson-framework
-reahl
-webcore
-morepath
+watson framework
 special relativity
 general relativity
 GitHub
@@ -35,4 +31,4 @@ json
 xml
 python socket
 matplotlib
-scikit-learn
+scikit learn
