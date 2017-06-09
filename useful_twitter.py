@@ -176,6 +176,7 @@ while 1:
     for partition in partitions:
         query = ' OR '.join(partition)
         tweets += t.search.tweets(q=query, count=199, lang="en")["statuses"]
+    random.shuffle(tweets)
     #tweets = t.search.tweets(q=query, count=199, lang="en")["statuses"]
     fr = t.friends.ids(screen_name="arichduvet")["ids"]
     if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio.
