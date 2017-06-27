@@ -151,7 +151,7 @@ def find_news():
 
 news = []
 while 1:
-    keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/zq02iogqhx5x9j2/keywords.txt?dl=0)
+    keywords = urllib.urlopen("https://dl.dropboxusercontent.com/s/zq02iogqhx5x9j2/keywords.txt?dl=0")
     words = [word.strip() for word in keywords.readlines()]
     keywords.close()
     word = random.choice(words)
