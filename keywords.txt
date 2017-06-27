@@ -8,7 +8,6 @@ numberphile
 artificial intelligence
 machine learning
 d3js
-php
 css
 raspberrypi
 arduino
@@ -19,20 +18,15 @@ feynman
 deep learning
 multithreading
 parallel computing
-pycnic
-django
-cherrypy
-turbogears2
 apache framework
 watson-framework
 reahl
 webcore
-morepath
+tensorflow
 special relativity
 general relativity
 GitHub
 json
-xml
 python socket
 matplotlib
 scikit-learn

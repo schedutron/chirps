@@ -38,14 +38,15 @@ if __name__ == "__main__":
 
 def print_followers(username):
     try:
-        c = 0
+        followers = t.followers.ids(screen_name=username)
+        c = followers["next_cursor"]
         while(c!=-1):
             followers = t.followers.list(screen_name=username, cursor = c)
             f = followers["users"]
 
             for follower in followers:
                 print follower["screen_name"]
-                c = followers["next_cursor"]
+            c = followers["next_cursor"]
     except:
         pass
 
