@@ -20,10 +20,9 @@ offensive = re.compile(
     #Above offensive compilation is not my stuff
 
 # Variables that contain the user credentials to access Twitter API
-
-
-
-
+with open('credentials') as creds:
+    inits = creds.read()
+    exec(inits) #initializes the credentials
 
 oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 
