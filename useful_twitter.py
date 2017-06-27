@@ -1,5 +1,5 @@
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, random, re, urllib, requests, HTMLParser
+import webbrowser, time, random, re, urllib, requests, HTMLParser, os
 parser = HTMLParser.HTMLParser() #used in find_news
 
 offensive = re.compile(
@@ -19,12 +19,7 @@ offensive = re.compile(
     flags=re.IGNORECASE) #Copyright (c) 2013-2016 Molly White
     #Above offensive compilation is not my stuff
 
-# Variables that contain the user credentials to access Twitter API
-with open('credentials') as creds:
-    inits = creds.read()
-    exec(inits) #initializes the credentials
-
-oauth = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
+oauth = OAuth(os.environ['ACCESS_TOKEN'], os.environ['ACCESS_SECRET'], os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
 
 t = Twitter(auth=oauth)
 ts = TwitterStream(auth=oauth)

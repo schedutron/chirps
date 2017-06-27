@@ -5,3 +5,4 @@ six==1.10.0
 twitter==1.17.1
 requests
 HTMLParser
+os
