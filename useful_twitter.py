@@ -1,3 +1,11 @@
+"""
+Script defining my Twitter bot, using sixohsix's Python wrapper for the
+Twitter API.
+"""
+# Instead of searching tweets and then doing actions on them, why not try
+# streaming interesting tweets in realtime and then performing actions on them?
+
+
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 import webbrowser, time, random, re, urllib, requests, HTMLParser, os
 parser = HTMLParser.HTMLParser() #used in find_news
