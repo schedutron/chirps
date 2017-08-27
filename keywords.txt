@@ -2,16 +2,17 @@ python
 pygame
 SQL
 ramanujan
+postgresql
 asme
 computerphile
 numberphile
 artificial intelligence
 machine learning
 d3js
-css
+mysql
 raspberrypi
-arduino
-computer vision
+Kivy
+Tkinter
 scala
 einstein
 feynman
@@ -20,13 +21,10 @@ multithreading
 parallel computing
 apache framework
 watson-framework
-reahl
-webcore
 tensorflow
 special relativity
 general relativity
 GitHub
 json
-python socket
 matplotlib
 scikit-learn

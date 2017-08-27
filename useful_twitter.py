@@ -166,7 +166,7 @@ while 1:
     tweets = t.search.tweets(q=word+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
     fr = t.friends.ids(screen_name="arichduvet")["ids"]
     if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio for people with less followers.
-                       #Using 5990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
+                       #Using 4990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
                        #manually even after a bot crash.
         for i in xrange(2500): #probably this is the upper limit of mass unfollow in one go
             unfollow(fr.pop())
