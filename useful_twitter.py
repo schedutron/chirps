@@ -227,6 +227,49 @@ class AccountThread(threading.Thread):
                 time.sleep(61)
 
 
+class StreamThread(threading.Thread):
+    def __init__(self, handler):
+        threading.Thread.__init__(self)
+        self.ts = handler
+
+    def run(self):
+        """This is the function for main listener loop."""
+        # TBD: Add periodic data checks to get updated data for messages, bads.
+        # Listen to bad people.
+        print("Streamer started.")
+        listener = self.ts.statuses.filter(
+            follow=','.join(
+                [str(bad) for bad in bads]
+            )
+        )
+        while True:
+            try:
+                tweet = next(listener)
+                """
+                Check if the tweet is original - workaroud for now. listener
+                also gets unwanted retweets, replies and so on.
+                """
+                if tweet['user']['id'] not in bads:
+                    print("Ignored from:", tweet['user']['screen_name'])
+                    continue
+                # Gets messages to tweet.
+                with requests.get(links['messages']) as messages_file:
+                    messages = messages_file.text.split('\n')[:-1]
+                # If they tweet, send them a kinda slappy reply.
+                reply(
+                    tweet['id'],
+                    tweet['user']['screen_name'],
+                    random.choice(messages)
+                )
+                # Print tweet for logging.
+                print('-*-'*33)
+                print_tweet(tweet)
+            except Exception as e:  # So that loop doesn't stop if error occurs.
+                print(json.dumps(tweet, indent=4))
+                print(e)
+            print('-*-'*33)
+
+
 def main():
     """Main function to handle different activites of the account."""
     #streamer = StreamThread(ts)  # For the reply and dm's part.
