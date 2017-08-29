@@ -30,10 +30,10 @@ offensive = re.compile(
 
 try:
     oauth = OAuth(
-        os.environ['TW_ACCESS_TOKEN'],
-        os.environ['TW_ACCESS_SECRET'],
-        os.environ['TW_CONSUMER_KEY'],
-        os.environ['TW_CONSUMER_SECRET']
+        os.environ['ACCESS_TOKEN'],
+        os.environ['ACCESS_SECRET'],
+        os.environ['CONSUMER_KEY'],
+        os.environ['CONSUMER_SECRET']
     )
 except KeyError:  # For local tests.
     with open('credentials', 'r') as secret:
