@@ -7,7 +7,7 @@ Twitter API.
 
 import threading
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, random, re, urllib.request, urllib.parse, urllib.error, requests, html.parser, os
+import webbrowser, time, random, re, requests, html.parser, os
 parser = html.parser.HTMLParser() #used in find_news
 
 offensive = re.compile(
