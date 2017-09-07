@@ -16,7 +16,6 @@ Tkinter
 scala
 einstein
 feynman
-deep learning
 multithreading
 parallel computing
 apache framework

@@ -2,6 +2,8 @@
 Script defining my Twitter bot, using sixohsix's Python wrapper for the
 Twitter API.
 """
+# Employ machine learning - follow only those people who follow back, and unfollow only
+# those people who don't unfollow back!
 # Instead of searching tweets and then doing actions on them, why not try
 # streaming interesting tweets in realtime and then performing actions on them?
 
@@ -27,6 +29,8 @@ offensive = re.compile(
     flags=re.IGNORECASE) #Copyright (c) 2013-2016 Molly White
     #Above offensive compilation is not my stuff
 
+news_block_expr = re.compile(r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?</a>')
+latest_expr = re.compile(r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>')
 
 try:
     oauth = OAuth(
@@ -131,17 +135,22 @@ def print_tweet(tweet):
         hashtags.append(h["text"])
     print(hashtags)
 
-def find_news():
+def find_news():  # I'm adventuring with regular expressions for parsing!
     nyTech = requests.get('https://nytimes.com/section/technology')
-    latest_patt = r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
-    latest = re.search(latest_patt, nyTech.text)
-    news = re.findall(r'(?s)<h2.*?>(.*?)</h2>', latest.group(1))
-    news = [item.strip() for item in list(set(news))]
-    for i in range(len(news)):
-        item = news[i]
-        if item.startswith('Daily Report: '):
-            news[i] = item[14:]
-    tv = requests.get('https://theverge.com', headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'})
+    
+    latest = latest_expr.search(nyTech.text)
+    #news = re.findall(r'(?s)<h2.*?>(.*?)</h2>', latest.group(1))
+    news_blocks = news_block_expr.findall(latest.group(1))
+    #news_links = re.findall(r'(?s)<a class="story-link" href=".*">', latest.group(1))
+    #news = [item.strip() for item in list(set(news))]
+    news = []
+    for i in range(len(news_blocks)):
+        item = news_blocks[i][1].strip() + ' ' + news_blocks[i][0]
+        if item[1].startswith('Daily Report: '):
+            item = item[14:]
+        news.append(item)
+    
+    '''tv = requests.get('https://theverge.com', headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'})
     feed_patt = r'(?s)<div class="c-compact-river">(.*?)<div class="l-col__sidebar"'
     bunches = re.findall(feed_patt, tv.text)
     verge_news = []
@@ -150,13 +159,14 @@ def find_news():
         verge_news.extend(snippets)
     for item in verge_news:
         news.append(parser.unescape(item))
-    random.shuffle(news) #to bring a feel of randomness
+    random.shuffle(news) #to bring a feel of randomness'''
     return news
 
-
+for item in find_news():
+    print(item)
 #confused stuff happened during the initialization at Heroku on Saturday, 4 Feb, 2017: around 2 pm.
 #see the confused_stuff snap.
-#By the way, confused stuff happens in the middle as well.
+#By the way, confused stuff still happens sometimes.
 class AccountThread(threading.Thread):
     def __init__(self, handler):
         self.t = handler
@@ -188,7 +198,7 @@ class AccountThread(threading.Thread):
             if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio for people with less followers.
                             #Using 4990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
                             #manually even after a bot crash.
-                for i in range(2500): #probably this is the upper limit of mass unfollow in one go
+                for i in range(2500):  # Probably this is the upper limit of mass unfollow in one go, so only 1000 are unfollowed.
                     unfollow(fr.pop())
 
             for tweet in tweets:
@@ -199,21 +209,11 @@ class AccountThread(threading.Thread):
                         print()
                         print("Heart =", fav_tweet(tweet))
                         print("Retweet =", retweet(tweet))
-                        #prev_follow = tweet["user"]["following"]
                         self.t.friendships.create(_id=tweet["user"]["id"])
-                        #now_follow = t.users.lookup(user_id=tweet["user"]["id"])[0]["following"]
-                        #if prev_follow==0 and now_follow==1:
-                        #    time.sleep(11)
-                        #    unfollow(fr.pop())
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
-                            #prev_follow_o = op["following"]
-                            #time.sleep(11)
                             self.t.friendships.create(_id=op["id"])
-                            #now_follow_o = t.users.lookup(user_id=op["id"])[0]["following"]
-                            #if prev_follow_o==0 and now_follow_o==1:
-                            #    time.sleep(11)
-                            #    unfollow(fr.pop())
+                            
                         print()
 
                         if not news:
