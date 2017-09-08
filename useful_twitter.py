@@ -50,12 +50,9 @@ t = Twitter(auth=oauth)
 ts = TwitterStream(auth=oauth)
 tu = TwitterStream(auth=oauth, domain="userstream.twitter.com")
 
-"""if __name__ == "__main__":
-    webbrowser.open("http://twitter.com")
-"""
 #useful Python functions
 
-def pf(sn): #better version for above (rate limiting problem?)
+def pf(sn):
      cursor = -1
      next_cursor=1
      while cursor != 0:
@@ -65,30 +62,22 @@ def pf(sn): #better version for above (rate limiting problem?)
                      print(follower["screen_name"])
              cursor = followers["next_cursor"]
 
+
 def fav_tweet(tweet):
-     try:
-             result = t.favorites.create(_id=tweet['id'])
-             return 1
-     except TwitterHTTPError:
-             return 0
+    t.favorites.create(_id=tweet['id'])
+
 
 def retweet(tweet):
-     try:
-             t.statuses.retweet._id(_id=tweet["id"])
-             return 1
-     except TwitterHTTPError:
-             return 0
+    t.statuses.retweet._id(_id=tweet["id"])
+
 
 def quote_tweet(tweet, text): #may not work for long links because of 140-limit. Can be improved.
-     id = tweet["id"]
-     sn = tweet["user"]["screen_name"]
-     link = "https://twitter.com/%s/status/%s" %(sn, id)
-     try:
-             string = text + " " + link
-             t.statuses.update(status=string)
-             return 1
-     except TwitterHTTPError:
-             return 0
+    id = tweet["id"]
+    sn = tweet["user"]["screen_name"]
+    link = "https://twitter.com/%s/status/%s" %(sn, id)
+    string = text + " " + link
+    t.statuses.update(status=string)
+
 
 def search_and_fav(keyword, num):
      tweets = t.search.tweets(q=keyword, result_type="recent", count=num, lang="en")["statuses"]
@@ -116,13 +105,7 @@ def search_and_follow(text, num): #improve this! Inaccurate feedback!
      print("Followed %i people." % success)
 
 def unfollow(iden):
-        success = 0
-        try:
-            t.friendships.destroy(_id=iden)
-            success += 1
-        except:
-            pass
-        #print "Unfollowed %i people." % success
+        t.friendships.destroy(_id=iden)
 
 def print_tweet(tweet):
     print(tweet["user"]["name"])
@@ -182,8 +165,10 @@ class AccountThread(threading.Thread):
                 for follower in followers:
                     print(follower["screen_name"])
                 c = followers["next_cursor"]
-        except:
-            pass
+        except Exception as e:
+            print("------")
+            print(e)
+            print("------")
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
@@ -222,8 +207,10 @@ class AccountThread(threading.Thread):
                         if not re.search(r'(?i)this|follow|search articles', item):
                             print("Scraped: ", item)
                             self.t.statuses.update(status=item)
-                except:
-                    pass
+                except Exception as e:
+                    print("------")
+                    print(e)
+                    print("------")
                 time.sleep(61)
 
 
