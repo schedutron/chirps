@@ -2,12 +2,15 @@
 Script defining my Twitter bot, using sixohsix's Python wrapper for the
 Twitter API.
 """
+
+# Use url shorteners for scraped news, and add images for those news.
 # Employ machine learning - follow only those people who follow back,
 # and unfollow only those people who don't unfollow back!
 # Instead of searching tweets and then doing actions on them, why not try
 # streaming interesting tweets in realtime and then performing actions on them?
 
 import html.parser
+import json
 import os
 import random
 import re
@@ -63,6 +66,7 @@ try:
         os.environ['CONSUMER_KEY'],
         os.environ['CONSUMER_SECRET']
     )
+    SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
 except KeyError:  # For local tests.
     with open('credentials', 'r') as secret:
         exec(secret.read())
@@ -176,7 +180,7 @@ def find_news():  # I'm adventuring with regular expressions for parsing!
     news_blocks = news_block_expr.findall(latest.group(1))
     news = []
     for i in range(len(news_blocks)):
-        item = news_blocks[i][1].strip() + ' ' + news_blocks[i][0]
+        item = news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0])
         if item[1].startswith('Daily Report: '):
             item = item[14:]
         news.append(item)
@@ -192,6 +196,19 @@ def find_news():  # I'm adventuring with regular expressions for parsing!
         news.append(parser.unescape(item))
     random.shuffle(news) #to bring a feel of randomness'''
     return news
+
+
+def shorten_url(url):
+    """Shortens the passed url using shorte.st's API."""
+
+    response = requests.put(
+        "https://api.shorte.st/v1/data/url",
+        {"urlToShorten":url}, headers={"public-api-token": SHORTE_ST_TOKEN}
+        )
+    info = json.loads(response.content.decode())
+    if info["status"]  == "ok":
+        return info["shortenedUrl"]
+    return url  # If shortening fails, the original url is returned.
 
 
 # Confused stuff happened during the initialization at Heroku on
