@@ -2,35 +2,59 @@
 Script defining my Twitter bot, using sixohsix's Python wrapper for the
 Twitter API.
 """
-# Employ machine learning - follow only those people who follow back, and unfollow only
-# those people who don't unfollow back!
+# Employ machine learning - follow only those people who follow back,
+# and unfollow only those people who don't unfollow back!
 # Instead of searching tweets and then doing actions on them, why not try
 # streaming interesting tweets in realtime and then performing actions on them?
 
+import html.parser
+import os
+import random
+import re
+import requests
 import threading
+import time
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
-import webbrowser, time, random, re, requests, html.parser, os
-parser = html.parser.HTMLParser() #used in find_news
+import webbrowser
 
+parser = html.parser.HTMLParser()  # Used in find_news()
+
+# Following offensive compilation is not my stuff.
+# Copyright (c) 2013-2017 Molly White.
 offensive = re.compile(
-    r"\b(deaths?|dead(ly)?|die(s|d)?|hurts?|(sex(ual(ly)?)?|child)[ -]?(abused?|trafficking|"
-    r"assault(ed|s)?)|injur(e|i?es|ed|y)|kill(ing|ed|er|s)?s?|wound(ing|ed|s)?|fatal(ly|ity)?|"
-    r"shoo?t(s|ing|er)?s?|crash(es|ed|ing)?|attack(s|ers?|ing|ed)?|murder(s|er|ed|ing)?s?|"
-    r"hostages?|(gang)?rap(e|es|ed|ist|ists|ing)|assault(s|ed)?|pile-?ups?|massacre(s|d)?|"
-    r"assassinate(d|s)?|sla(y|in|yed|ys|ying|yings)|victims?|tortur(e|ed|ing|es)|"
-    r"execut(e|ion|ed|ioner)s?|gun(man|men|ned)|suicid(e|al|es)|bomb(s|ed|ing|ings|er|ers)?|"
-    r"mass[- ]?graves?|bloodshed|state[- ]?of[- ]?emergency|al[- ]?Qaeda|blasts?|violen(t|ce)|"
-    r"lethal|cancer(ous)?|stab(bed|bing|ber)?s?|casualt(y|ies)|sla(y|ying|yer|in)|"
-    r"drown(s|ing|ed|ings)?|bod(y|ies)|kidnap(s|ped|per|pers|ping|pings)?|rampage|beat(ings?|en)|"
-    r"terminal(ly)?|abduct(s|ed|ion)?s?|missing|behead(s|ed|ings?)?|homicid(e|es|al)|"
-    r"burn(s|ed|ing)? alive|decapitated?s?|jihadi?s?t?|hang(ed|ing|s)?|funerals?|traged(y|ies)|"
-    r"autops(y|ies)|child sex|sob(s|bing|bed)?|pa?edophil(e|es|ia)|9(/|-)11|Sept(ember|\.)? 11|"
+    r"\b(deaths?|dead(ly)?|die(s|d)?|hurts?|(sex(ual(ly)?)?|"
+    r"child)[ -]?(abused?|trafficking|"
+    r"assault(ed|s)?)|injur(e|i?es|ed|y)|kill(ing|ed|er|s)?s?|"
+    r"wound(ing|ed|s)?|fatal(ly|ity)?|"
+    r"shoo?t(s|ing|er)?s?|crash(es|ed|ing)?|attack(s|ers?|ing|ed)?|"
+    r"murder(s|er|ed|ing)?s?|"
+    r"hostages?|(gang)?rap(e|es|ed|ist|ists|ing)|assault(s|ed)?|"
+    r"pile-?ups?|massacre(s|d)?|"
+    r"assassinate(d|s)?|sla(y|in|yed|ys|ying|yings)|victims?|"
+    r"tortur(e|ed|ing|es)|"
+    r"execut(e|ion|ed|ioner)s?|gun(man|men|ned)|suicid(e|al|es)|"
+    r"bomb(s|ed|ing|ings|er|ers)?|"
+    r"mass[- ]?graves?|bloodshed|state[- ]?of[- ]?emergency|al[- ]?Qaeda|"
+    r"blasts?|violen(t|ce)|"
+    r"lethal|cancer(ous)?|stab(bed|bing|ber)?s?|casualt(y|ies)|"
+    r"sla(y|ying|yer|in)|"
+    r"drown(s|ing|ed|ings)?|bod(y|ies)|kidnap(s|ped|per|pers|ping|pings)?|"
+    r"rampage|beat(ings?|en)|"
+    r"terminal(ly)?|abduct(s|ed|ion)?s?|missing|behead(s|ed|ings?)?|"
+    r"homicid(e|es|al)|"
+    r"burn(s|ed|ing)? alive|decapitated?s?|jihadi?s?t?|hang(ed|ing|s)?|"
+    r"funerals?|traged(y|ies)|"
+    r"autops(y|ies)|child sex|sob(s|bing|bed)?|pa?edophil(e|es|ia)|"
+    r"9(/|-)11|Sept(ember|\.)? 11|"
     r"genocide)\W?\b",
-    flags=re.IGNORECASE) #Copyright (c) 2013-2016 Molly White
-    #Above offensive compilation is not my stuff
+    flags=re.IGNORECASE)
 
-news_block_expr = re.compile(r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?</a>')
-latest_expr = re.compile(r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>')
+news_block_expr = re.compile(
+    r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?</a>'
+    )
+latest_expr = re.compile(
+    r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+    )
 
 try:
     oauth = OAuth(
@@ -50,64 +74,89 @@ t = Twitter(auth=oauth)
 ts = TwitterStream(auth=oauth)
 tu = TwitterStream(auth=oauth, domain="userstream.twitter.com")
 
-#useful Python functions
+# Following are some useful wrappers for Twitter-related functionalities.
+
 
 def pf(sn):
-     cursor = -1
-     next_cursor=1
-     while cursor != 0:
-             followers = t.followers.list(screen_name=sn, cursor=cursor)
-             f = followers["users"]
-             for follower in f:
-                     print(follower["screen_name"])
-             cursor = followers["next_cursor"]
+    """
+    Attempts to print the followers of a user, provided their
+    screen name.
+    """
+
+    cursor = -1
+    next_cursor = 1
+    while cursor != 0:
+        followers = t.followers.list(screen_name=sn, cursor=cursor)
+        f = followers["users"]
+        for follower in f:
+            print(follower["screen_name"])
+        cursor = followers["next_cursor"]
 
 
 def fav_tweet(tweet):
+    """Attempts to favorite a tweet."""
+
     t.favorites.create(_id=tweet['id'])
 
 
 def retweet(tweet):
+    """Attempts to retweet a tweet."""
+
     t.statuses.retweet._id(_id=tweet["id"])
 
 
-def quote_tweet(tweet, text): #may not work for long links because of 140-limit. Can be improved.
+def quote_tweet(tweet, text):
+    """Quotes a tweet with text."""
+    # May not work for long links because of 140-limit. Can be improved.
     id = tweet["id"]
     sn = tweet["user"]["screen_name"]
-    link = "https://twitter.com/%s/status/%s" %(sn, id)
+    link = "https://twitter.com/%s/status/%s" % (sn, id)
     string = text + " " + link
     t.statuses.update(status=string)
 
 
 def search_and_fav(keyword, num):
-     tweets = t.search.tweets(q=keyword, result_type="recent", count=num, lang="en")["statuses"]
-     first = tweets[0]["text"]
-     last = tweets[-1]["text"]
-     success = 0
-     tweets.reverse()
-     for tweet in tweets:
-             if fav_tweet(tweet):
-                     success += 1
-     print("Favorited %i tweets." % success)
-     print("First's text:", first)
-     print("Last's text:", last)
+    """Searches tweets having a keyword and likes them."""
 
-def search_and_follow(text, num): #improve this! Inaccurate feedback!
-     tweets = t.search.tweets(q=text, lang="en", count=num)
-     tweets = tweets["statuses"]
-     success = 0
-     for tweet in tweets:
-             try:
-                     t.friendships.create(_id=tweet["user"]["id"])
-                     success += 1
-             except:
-                     pass
-     print("Followed %i people." % success)
+    tweets = t.search.tweets(
+        q=keyword, result_type="recent", count=num, lang="en"
+        )["statuses"]
+    first = tweets[0]["text"]
+    last = tweets[-1]["text"]
+    success = 0
+    tweets.reverse()
+    for tweet in tweets:
+        if fav_tweet(tweet):
+            success += 1
+    print("Favorited %i tweets." % success)
+    print("First's text:", first)
+    print("Last's text:", last)
+
+
+def search_and_follow(text, num):  # Improve this! Inaccurate feedback!
+    """Searches tweets for a keyword and followers their tweet-ers."""
+
+    tweets = t.search.tweets(q=text, lang="en", count=num)
+    tweets = tweets["statuses"]
+    success = 0
+    for tweet in tweets:
+        try:
+            t.friendships.create(_id=tweet["user"]["id"])
+            success += 1
+        except Exception as e:
+            print(e)
+    print("Followed %i people." % success)
+
 
 def unfollow(iden):
-        t.friendships.destroy(_id=iden)
+    """Attempts to unfollow a user, provided their id."""
+
+    t.friendships.destroy(_id=iden)
+
 
 def print_tweet(tweet):
+    """Displays the primary info of a tweet."""
+
     print(tweet["user"]["name"])
     print(tweet["user"]["screen_name"])
     print(tweet["created_at"])
@@ -118,21 +167,20 @@ def print_tweet(tweet):
         hashtags.append(h["text"])
     print(hashtags)
 
+
 def find_news():  # I'm adventuring with regular expressions for parsing!
+    """Finds news for tweeting, along with their links."""
+
     nyTech = requests.get('https://nytimes.com/section/technology')
-    
     latest = latest_expr.search(nyTech.text)
-    #news = re.findall(r'(?s)<h2.*?>(.*?)</h2>', latest.group(1))
     news_blocks = news_block_expr.findall(latest.group(1))
-    #news_links = re.findall(r'(?s)<a class="story-link" href=".*">', latest.group(1))
-    #news = [item.strip() for item in list(set(news))]
     news = []
     for i in range(len(news_blocks)):
         item = news_blocks[i][1].strip() + ' ' + news_blocks[i][0]
         if item[1].startswith('Daily Report: '):
             item = item[14:]
         news.append(item)
-    
+
     '''tv = requests.get('https://theverge.com', headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'})
     feed_patt = r'(?s)<div class="c-compact-river">(.*?)<div class="l-col__sidebar"'
     bunches = re.findall(feed_patt, tv.text)
@@ -145,21 +193,23 @@ def find_news():  # I'm adventuring with regular expressions for parsing!
     random.shuffle(news) #to bring a feel of randomness'''
     return news
 
-for item in find_news():
-    print(item)
-#confused stuff happened during the initialization at Heroku on Saturday, 4 Feb, 2017: around 2 pm.
-#see the confused_stuff snap.
-#By the way, confused stuff still happens sometimes.
+
+# Confused stuff happened during the initialization at Heroku on
+# Saturday, 4 Feb, 2017: around 2 pm.
+
+# See the confused_stuff snap.
+# By the way, confused stuff still happens sometimes.
 class AccountThread(threading.Thread):
     def __init__(self, handler):
         self.t = handler
 
     def print_followers(self, username):
+        """Method to print the followers of a user."""
         try:
             followers = self.t.followers.ids(screen_name=username)
             c = followers["next_cursor"]
-            while(c!=-1):
-                followers = self.t.followers.list(screen_name=username, cursor = c)
+            while c != -1:
+                followers = self.t.followers.list(screen_name=username, cursor=c)
                 f = followers["users"]
 
                 for follower in followers:
@@ -172,23 +222,34 @@ class AccountThread(threading.Thread):
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
+
         print("Account Manager started.")
         news = []
         while 1:
             with requests.get("https://dl.dropboxusercontent.com/s/zq02iogqhx5x9j2/keywords.txt?dl=0") as keywords:
                 words = [word.strip() for word in keywords.text.split()]
             word = random.choice(words)
-            tweets = self.t.search.tweets(q=word+' -from:arichduvet', count=199, lang="en")["statuses"] #understand OR operator
+            tweets = self.t.search.tweets(
+                q=word+' -from:arichduvet', count=199, lang="en"
+                )["statuses"]  # Understand OR operator.
             fr = self.t.friends.ids(screen_name="arichduvet")["ids"]
-            if len(fr) > 4990: #To unfollow old follows because Twitter doesn't allow a large following / followers ratio for people with less followers.
-                            #Using 4990 instead of 5000 for 'safety', so that I'm able to follow some interesting people
-                            #manually even after a bot crash.
-                for i in range(2500):  # Probably this is the upper limit of mass unfollow in one go, so only 1000 are unfollowed.
+            """
+            The purpose of following if:
+            To unfollow old follows because Twitter doesn't allow a large
+            following / followers ratio for people with less followers.
+            Using 4990 instead of 5000 for 'safety', so that I'm able
+            to follow some interesting people manually even after a
+            bot crash.
+            """
+            if len(fr) > 4990:
+                # Perhaps the upper limit for mass unfollow is 1000 a day.
+                for i in range(1000):
                     unfollow(fr.pop())
 
             for tweet in tweets:
                 try:
-                    if re.search(offensive, tweet["text"]) == None:
+                    # Following if: So that bad tweets don't come into play.
+                    if re.search(offensive, tweet["text"]) is None:
                         print("Search tag:", word)
                         print_tweet(tweet)
                         print()
@@ -198,15 +259,15 @@ class AccountThread(threading.Thread):
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
                             self.t.friendships.create(_id=op["id"])
-                            
                         print()
-
                         if not news:
                             news = find_news()
                         item = news.pop()
                         if not re.search(r'(?i)this|follow|search articles', item):
                             print("Scraped: ", item)
                             self.t.statuses.update(status=item)
+                    else:
+                        print("[No offense]:", tweet["text"])
                 except Exception as e:
                     print("------")
                     print(e)
@@ -216,6 +277,7 @@ class AccountThread(threading.Thread):
 
 class StreamThread(threading.Thread):
     def __init__(self, handler):
+        """Constructor for this class, sets the handler for streaming."""
         threading.Thread.__init__(self)
         self.ts = handler
 
