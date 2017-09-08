@@ -3,7 +3,7 @@ Script defining my Twitter bot, using sixohsix's Python wrapper for the
 Twitter API.
 """
 
-# Use url shorteners for scraped news, and add images for those news.
+# Currently, news images are small. Make them large.
 # Employ machine learning - follow only those people who follow back,
 # and unfollow only those people who don't unfollow back!
 # Instead of searching tweets and then doing actions on them, why not try
@@ -53,7 +53,8 @@ offensive = re.compile(
     flags=re.IGNORECASE)
 
 news_block_expr = re.compile(
-    r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?</a>'
+    r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
+    r'<img.*?src="(.*?)".*?>.*?</a>'
     )
 latest_expr = re.compile(
     r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
@@ -75,6 +76,9 @@ except KeyError:  # For local tests.
         )
 
 t = Twitter(auth=oauth)
+# For uploading photos.
+t_upload = Twitter(auth=oauth, domain="upload.twitter.com")
+
 ts = TwitterStream(auth=oauth)
 tu = TwitterStream(auth=oauth, domain="userstream.twitter.com")
 
@@ -180,7 +184,9 @@ def find_news():  # I'm adventuring with regular expressions for parsing!
     news_blocks = news_block_expr.findall(latest.group(1))
     news = []
     for i in range(len(news_blocks)):
-        item = news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0])
+        item = (
+            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
+            news_blocks[i][2].strip())  # This is img src.
         if item[1].startswith('Daily Report: '):
             item = item[14:]
         news.append(item)
@@ -203,10 +209,10 @@ def shorten_url(url):
 
     response = requests.put(
         "https://api.shorte.st/v1/data/url",
-        {"urlToShorten":url}, headers={"public-api-token": SHORTE_ST_TOKEN}
+        {"urlToShorten": url}, headers={"public-api-token": SHORTE_ST_TOKEN}
         )
     info = json.loads(response.content.decode())
-    if info["status"]  == "ok":
+    if info["status"] == "ok":
         return info["shortenedUrl"]
     return url  # If shortening fails, the original url is returned.
 
@@ -217,8 +223,9 @@ def shorten_url(url):
 # See the confused_stuff snap.
 # By the way, confused stuff still happens sometimes.
 class AccountThread(threading.Thread):
-    def __init__(self, handler):
+    def __init__(self, handler, upload_handler=None):
         self.t = handler
+        self.t_upload = upload_handler
 
     def print_followers(self, username):
         """Method to print the followers of a user."""
@@ -226,7 +233,10 @@ class AccountThread(threading.Thread):
             followers = self.t.followers.ids(screen_name=username)
             c = followers["next_cursor"]
             while c != -1:
-                followers = self.t.followers.list(screen_name=username, cursor=c)
+                followers = self.t.followers.list(
+                    screen_name=username,
+                    cursor=c
+                    )
                 f = followers["users"]
 
                 for follower in followers:
@@ -243,8 +253,11 @@ class AccountThread(threading.Thread):
         print("Account Manager started.")
         news = []
         while 1:
-            with requests.get("https://dl.dropboxusercontent.com/s/zq02iogqhx5x9j2/keywords.txt?dl=0") as keywords:
-                words = [word.strip() for word in keywords.text.split()]
+            with requests.get(
+                "https://dl.dropboxusercontent.com"
+                "/s/zq02iogqhx5x9j2/keywords.txt?dl=0"
+                ) as keywords:
+                    words = [word.strip() for word in keywords.text.split()]
             word = random.choice(words)
             tweets = self.t.search.tweets(
                 q=word+' -from:arichduvet', count=199, lang="en"
@@ -270,19 +283,30 @@ class AccountThread(threading.Thread):
                         print("Search tag:", word)
                         print_tweet(tweet)
                         print()
-                        print("Heart =", fav_tweet(tweet))
-                        print("Retweet =", retweet(tweet))
                         self.t.friendships.create(_id=tweet["user"]["id"])
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
                             self.t.friendships.create(_id=op["id"])
-                        print()
                         if not news:
                             news = find_news()
                         item = news.pop()
-                        if not re.search(r'(?i)this|follow|search articles', item):
-                            print("Scraped: ", item)
-                            self.t.statuses.update(status=item)
+                        if not re.search(
+                            r'(?i)this|follow|search articles',
+                            item[0]
+                            ):
+                            print("Scraped: ", item[0])
+
+                            # This uploads the relevant photo and gets it's
+                            # id for attachment in tweet.
+                            photo_id = self.t_upload.media.upload(
+                                media=requests.get(item[1]).content
+                                )["media_id_string"]
+
+                            self.t.statuses.update(
+                                status=item[0],
+                                media_ids=photo_id
+                                )
+
                     else:
                         print("[No offense]:", tweet["text"])
                 except Exception as e:
@@ -330,7 +354,7 @@ class StreamThread(threading.Thread):
                 # Print tweet for logging.
                 print('-*-'*33)
                 print_tweet(tweet)
-            except Exception as e:  # So that loop doesn't stop if error occurs.
+            except Exception as e:  # So that loop still continues.
                 print(json.dumps(tweet, indent=4))
                 print(e)
             print('-*-'*33)
@@ -339,7 +363,9 @@ class StreamThread(threading.Thread):
 def main():
     """Main function to handle different activites of the account."""
     #streamer = StreamThread(ts)  # For the reply and dm's part.
-    account_manager = AccountThread(t)  # For retweets, likes, follows.
+
+    # For retweets, likes, follows.
+    account_manager = AccountThread(t, t_upload)
     #streamer.start()
     account_manager.run()
 
