@@ -273,7 +273,7 @@ class AccountThread(threading.Thread):
             """
             if len(fr) > 4990:
                 # Perhaps the upper limit for mass unfollow is 1000 a day.
-                for i in range(1000):
+                for i in range(500):
                     unfollow(fr.pop())
 
             for tweet in tweets:
@@ -283,6 +283,8 @@ class AccountThread(threading.Thread):
                         print("Search tag:", word)
                         print_tweet(tweet)
                         print()
+                        fav_tweet(tweet)
+                        retweet(tweet)
                         self.t.friendships.create(_id=tweet["user"]["id"])
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
