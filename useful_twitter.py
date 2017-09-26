@@ -285,10 +285,13 @@ class AccountThread(threading.Thread):
                         print()
                         fav_tweet(tweet)
                         retweet(tweet)
+                        # Disabling follows for a while.
+                        """
                         self.t.friendships.create(_id=tweet["user"]["id"])
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
                             self.t.friendships.create(_id=op["id"])
+                        """
                         if not news:
                             news = find_news()
                         item = news.pop()
