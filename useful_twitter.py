@@ -271,7 +271,7 @@ class AccountThread(threading.Thread):
             to follow some interesting people manually even after a
             bot crash.
             """
-            if len(fr) > 4200:
+            if len(fr) > 4000:
                 # Perhaps the upper limit for mass unfollow is 1000 a day.
                 for i in range(500):
                     unfollow(fr.pop())
@@ -286,12 +286,12 @@ class AccountThread(threading.Thread):
                         fav_tweet(tweet)
                         retweet(tweet)
                         # Disabling follows for a while.
-                        """
+                        
                         self.t.friendships.create(_id=tweet["user"]["id"])
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
                             self.t.friendships.create(_id=op["id"])
-                        """
+                        
                         if not news:
                             news = find_news()
                         item = news.pop()
