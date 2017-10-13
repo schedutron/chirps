@@ -1,4 +1,4 @@
-# ![Cute Bird (wanted title to be more Twitter-y)]( chirps/1.png ) chirps
+# ![Alt text](1.png )chirps
 Twitter bot powering www.twitter.com/arichduvet
 
 Uses [@sixohsix](https://github.com/sixohsix)'s Python-based Twitter API for posting and other actions.
