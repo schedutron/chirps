@@ -1,4 +1,4 @@
-# ![Alt text](1.png )chirps
+# ![chirps](1.png )
 Twitter bot powering www.twitter.com/arichduvet
 
 Uses [@sixohsix](https://github.com/sixohsix)'s Python-based Twitter API for posting and other actions.
