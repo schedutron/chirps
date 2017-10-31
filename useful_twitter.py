@@ -6,6 +6,14 @@ Twitter API.
 # Currently, news images are small. Make them large.
 # Employ machine learning - follow only those people who follow back,
 # and unfollow only those people who don't unfollow back!
+
+# Start collecting data for training an NN to optimise the number or
+# followers.
+
+#  As loss-function you could use something like 1000-<followers gained in
+# time x> to have the bot aim for a plus of 1000 followers in time x. Where
+# time x could in theory be anything. An hour, two, five or a day.
+
 # Instead of searching tweets and then doing actions on them, why not try
 # streaming interesting tweets in realtime and then performing actions on them?
 

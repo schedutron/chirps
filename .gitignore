@@ -2,3 +2,4 @@ credentials
 .DS_Store
 .env
 bot/
+.vscode/
