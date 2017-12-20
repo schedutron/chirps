@@ -278,11 +278,12 @@ class AccountThread(threading.Thread):
             Using 4990 instead of 5000 for 'safety', so that I'm able
             to follow some interesting people manually even after a
             bot crash.
-            """
+            
             if len(fr) > 4000:
                 # Perhaps the upper limit for mass unfollow is 1000 a day.
                 for i in range(500):
                     unfollow(fr.pop())
+            """
 
             for tweet in tweets:
                 try:
