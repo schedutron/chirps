@@ -1,1 +1,1 @@
-worker: python3 useful_twitter.py
+worker: python3 main.py
