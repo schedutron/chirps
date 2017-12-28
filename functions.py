@@ -5,7 +5,11 @@ import json
 import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
-from credentials import SHORTE_ST_TOKEN
+try:
+    from credentials import SHORTE_ST_TOKEN
+else:
+    import os
+    SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
 from twitter import TwitterHTTPError
 # Here 't' is account handler defined in the main script.
 
