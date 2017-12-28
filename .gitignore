@@ -3,3 +3,4 @@ credentials.py
 .env
 bot/
 .vscode/
+screen_name.py

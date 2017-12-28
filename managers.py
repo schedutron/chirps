@@ -79,9 +79,10 @@ class StreamThread(threading.Thread):
 class AccountThread(threading.Thread):
     """Account thread manages favoriting, retweeting and following people who
     tweet interesting stuff."""
-    def __init__(self, handler, url, sleep_time):
+    def __init__(self, handler, upload_handler, url, sleep_time):
         threading.Thread.__init__(self)
         self.handler = handler
+        self.upload_handler = upload_handler
         self.conn = functions.db_connect(url)
         print("Database connection successful.")
         self.cur = self.conn.cursor()
@@ -92,14 +93,14 @@ class AccountThread(threading.Thread):
         """Main loop to handle account retweets, follows, and likes."""
 
         print("Account Manager started.")
-        
+        subtract_string = ' -from:%s' % screen_name  # For not extracting self's tweets.
         while 1:
             cur = functions.get_cursor(self.db_access)
             word = functions.get_keyword(cur)
             print("Chosen word:", word)
             # Add '-from:TheRealEqualizer' in the following line.
             tweets = self.handler.search.tweets(
-                q=word, count=199,
+                q=word+subtract_string, count=199,
                 lang="en")["statuses"]  # Understand OR operator.
 
 
@@ -120,16 +121,35 @@ class AccountThread(threading.Thread):
             for tweet in tweets:
                 try:
                     if re.search(OFFENSIVE, tweet["text"]) is None:
-                        #print("Search tag:", word)
-                        #print_tweet(tweet)
-                        #print()
+                        print("Search tag:", word)
+                        print_tweet(tweet)
+                        print()
                         functions.fav_tweet(self.handler, tweet)
                         functions.retweet(self.handler, tweet)
-                        #self.handler.friendships.create(_id=tweet["user"]["id"])
-                        #if "retweeted_status" in tweet:
-                        #    op = tweet["retweeted_status"]["user"]
-                        #    self.handler.friendships.create(_id=op["id"])
-                        #print()
+                        self.handler.friendships.create(_id=tweet["user"]["id"])
+                        if "retweeted_status" in tweet:
+                            op = tweet["retweeted_status"]["user"]
+                            self.handler.friendships.create(_id=op["id"])
+                        print()
+
+                    if not news:
+                        news = find_news()
+                        item = news.pop()
+                        if not re.search(
+                            r'(?i)this|follow|search articles', item[0]
+                            ):
+                            print("Scraped: ", item[0])
+
+                            # This uploads the relevant photo and gets it's
+                            # id for attachment in tweet.
+                            photo_id = self.upload_handler.media.upload(
+                                media=requests.get(item[1]).content
+                                )["media_id_string"]
+
+                            self.handler.statuses.update(
+                                status=item[0],
+                                media_ids=photo_id
+                                )
                 except Exception as exception:
                     print(exception)
                 time.sleep(self.sleep_time)

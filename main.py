@@ -35,6 +35,7 @@ url = parse.urlparse(DATABASE_URL)
 
 OAUTH = OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 ACCOUNT_HANDLER = Twitter(auth=OAUTH)
+UPLOAD_HANDLER = Twitter(auth=OAUTH, domain="upload.twitter.com")
 STREAM_HANDLER = TwitterStream(auth=OAUTH)
 ADMIN_HANDLER = TwitterStream(auth=OAUTH)
 
@@ -45,7 +46,7 @@ def main():
     streamer = managers.StreamThread("Streamer",
         STREAM_HANDLER, ACCOUNT_HANDLER, url,
         functions.reply_with_shortened_url)  # For the troubling part.
-    account_manager = managers.AccountThread(ACCOUNT_HANDLER, url, 60)  # For retweets, likes, follows.
+    account_manager = managers.AccountThread(ACCOUNT_HANDLER, UPLOAD_HANDLER, url, 60)  # For retweets, likes, follows.
     admin = managers.StreamThread(
         "Admin", ADMIN_HANDLER, ACCESS_SECRET, url, functions.admin_action)
     streamer.start()
