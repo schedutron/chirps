@@ -97,6 +97,7 @@ class AccountThread(threading.Thread):
         """Main loop to handle account retweets, follows, and likes."""
 
         print("Account Manager started.")
+        news = []
         subtract_string = ' -from:%s' % screen_name  # For not extracting self's tweets.
         while 1:
             cur = functions.get_cursor(self.db_access)
