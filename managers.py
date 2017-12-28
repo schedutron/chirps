@@ -15,7 +15,11 @@ import requests
 import functions  # Useful functions for Twitter and scraping stuff.
 # For identifying offensive tweets.
 from offensive import OFFENSIVE
-from screen_name import screen_name
+try:
+    from screen_name import screen_name
+except ModuleNotFoundError:
+    import os
+    screen_name = os.environ['SCREEN_NAME']
 
 # Perhaps using a database would be better if frequent updation is needed.
 # This gets links to files containing relevant data.

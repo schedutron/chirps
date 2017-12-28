@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-This script gives people what they deserve on Twitter, and tries luck in 'RT
-to win' competititons.
+Main Twitter bot script which glues everything together and starts the managers.
 """
 import os
 from urllib import parse
