@@ -135,7 +135,6 @@ class AccountThread(threading.Thread):
                         if "retweeted_status" in tweet:
                             op = tweet["retweeted_status"]["user"]
                             self.handler.friendships.create(_id=op["id"])
-                        print()
 
                     if not news:
                         news = functions.find_news()

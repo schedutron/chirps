@@ -1,6 +1,7 @@
 "This script contains useful functions for building the Twitter bot."
 
 import json
+import re
 
 import psycopg2  # We're using postgres as our database system.
 import requests
