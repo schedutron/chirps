@@ -5,3 +5,5 @@ six
 twitter
 requests
 HTMLParser
+psycopg2
+lxml

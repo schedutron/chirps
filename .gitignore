@@ -1,4 +1,4 @@
-credentials
+credentials.py
 .DS_Store
 .env
 bot/
