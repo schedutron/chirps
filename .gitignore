@@ -1,6 +1,4 @@
-credentials.py
 .DS_Store
 .env
 bot/
 .vscode/
-screen_name.py
