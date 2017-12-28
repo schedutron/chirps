@@ -126,7 +126,7 @@ class AccountThread(threading.Thread):
                 try:
                     if re.search(OFFENSIVE, tweet["text"]) is None:
                         print("Search tag:", word)
-                        print_tweet(tweet)
+                        functions.print_tweet(tweet)
                         print()
                         functions.fav_tweet(self.handler, tweet)
                         functions.retweet(self.handler, tweet)
