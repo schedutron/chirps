@@ -138,7 +138,7 @@ class AccountThread(threading.Thread):
                         print()
 
                     if not news:
-                        news = find_news()
+                        news = functions.find_news()
                         item = news.pop()
                         if not re.search(
                             r'(?i)this|follow|search articles', item[0]
