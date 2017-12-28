@@ -7,7 +7,7 @@ import requests
 from lxml.html import fromstring
 try:
     from credentials import SHORTE_ST_TOKEN
-else:
+except:
     import os
     SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
 from twitter import TwitterHTTPError
