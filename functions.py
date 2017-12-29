@@ -168,7 +168,7 @@ def get_cursor(db_access):
     return db_access['cur']
 
 
-def reply_with_shortened_url(kwargs):  # Note the nontraditional use of kwargs.
+def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontraditional use of kwargs.
     """Function for replying to the tweet with a shortened url."""
     tweet = kwargs['tweet']
     handler = kwargs['handler']
@@ -202,8 +202,9 @@ def reply_with_shortened_url(kwargs):  # Note the nontraditional use of kwargs.
     #     "https://twitter.com/"\
     #     + rep_tweet["user"]["screen_name"]\
     #     + "/status/"+rep_tweet["id_str"]
-
-    short_url = shorten_url(news_content[1])
+    shorten_url = ''
+    if use_short_url:
+        short_url = shorten_url(news_content[1])
     # message = random.choice(messages) + " " + short_url
     # Instead of a catchy but unrelated text, tweet the headline
     # itself with the short link.
