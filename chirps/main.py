@@ -21,6 +21,8 @@ import chirps.managers as managers
 # Fix the weird error on Heroku about expecting bytes instead of string!
 
 try:
+    from chirps.credentials import *
+except ModuleNotFoundError:
     ACCESS_TOKEN = os.environ['ACCESS_TOKEN'],
     ACCESS_SECRET = os.environ['ACCESS_SECRET'],
     CONSUMER_KEY = os.environ['CONSUMER_KEY'],
@@ -28,8 +30,6 @@ try:
     
     SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
     DATABASE_URL = os.environ["DATABASE_URL"]
-except KeyError:  # For local runs.
-    from credentials import *
 
 url = parse.urlparse(DATABASE_URL)
 
