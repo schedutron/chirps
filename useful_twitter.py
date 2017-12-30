@@ -1,7 +1,4 @@
-"""
-Script defining my Twitter bot, using sixohsix's Python wrapper for the
-Twitter API.
-"""
+"""Archived initial script defining the bot."""
 
 # Currently, news images are small. Make them large.
 # Employ machine learning - follow only those people who follow back,
