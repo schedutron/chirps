@@ -6,13 +6,13 @@ import re
 import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
+from twitter import TwitterHTTPError
+
 try:
-    from credentials import SHORTE_ST_TOKEN
+    from chirps.credentials import SHORTE_ST_TOKEN
 except:
     import os
     SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
-from twitter import TwitterHTTPError
-# Here 't' is account handler defined in the main script.
 
 def reply(account_handler, tweet_id, user_name, msg):
     """

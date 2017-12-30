@@ -11,12 +11,12 @@ import threading
 from urllib import parse  # For database connection/
 
 import requests
-
-import functions  # Useful functions for Twitter and scraping stuff.
+# Useful functions for Twitter and scraping stuff.
+import chirps.functions as functions
 # For identifying offensive tweets.
-from offensive import OFFENSIVE
+from chirps.offensive import OFFENSIVE
 try:
-    from screen_name import screen_name
+    from chirps.screen_name import screen_name
 except ModuleNotFoundError:
     import os
     screen_name = os.environ['SCREEN_NAME']

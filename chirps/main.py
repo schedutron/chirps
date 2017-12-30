@@ -6,9 +6,10 @@ import os
 from urllib import parse
 import psycopg2
 from twitter import Twitter, OAuth, TwitterStream
-
-import functions # Useful boilerplate functions for the overall Twitter bot.
-import managers  # Useful classes for streaming and account handling.
+# Useful boilerplate functions for the overall Twitter bot.
+import chirps.functions as functions
+# Useful classes for streaming and account handling.
+import chirps.managers as managers
 
 # A different idea - use cookies to visit shortened links via visitors' devices.
 # Maybe we can utilize 'RT to win' stuff by this same script.
