@@ -1,6 +1,6 @@
-credentials.py
+chirps/credentials.py
 .DS_Store
 .env
 bot/
 .vscode/
-screen_name.py
+chirps/screen_name.py
