@@ -1,6 +1,6 @@
 # ![chirps](1.png )
 
-![https://tokei.rs/b1/github/schedutron/chirps](https://tokei.rs)
+![Lines of code](https://tokei.rs/b1/github/schedutron/chirps)
 
 Twitter bot powering www.twitter.com/arichduvet
 
