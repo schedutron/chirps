@@ -98,9 +98,6 @@ class AccountThread(threading.Thread):
         self.retweet = retweet
         self.follow = follow
         self.scrape = scrape
-        print("sleep_time=%s" % sleep_time)
-        print('fav=', self.fav)
-        print('retweet=%s, follow=%s, scrape=%s' % (self.retweet, self.follow, self.scrape))
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
