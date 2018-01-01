@@ -8,12 +8,6 @@ import requests
 from lxml.html import fromstring
 from twitter import TwitterHTTPError
 
-try:
-    from chirps.credentials import SHORTE_ST_TOKEN
-except:
-    import os
-    SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
-
 def reply(account_handler, tweet_id, user_name, msg):
     """
     Sends msg as reply to the tweet whose id is passed.
@@ -91,7 +85,7 @@ def unfollow(account_handler, iden):
 
 def shorten_url(url):
     """Shortens the passed url using shorte.st's API."""
-
+    from chirps.credentials import SHORTE_ST_TOKEN
     response = requests.put(
         "https://api.shorte.st/v1/data/url",
         {"urlToShorten": url}, headers={"public-api-token": SHORTE_ST_TOKEN}
