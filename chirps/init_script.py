@@ -66,7 +66,7 @@ while True:
     message = input()
     if message.lower() == "exit":
         break
-    messages.append(messages)
+    messages.append(message)
 for message in messages:
     cur.execute("INSERT INTO messages VALUES(%s)", (message,))
 conn.commit()
