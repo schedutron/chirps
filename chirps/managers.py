@@ -55,8 +55,10 @@ class StreamThread(threading.Thread):
         print(self.identifier, "started.")
         if self.identifier == 'Streamer':
             rel_name = 'accounts'
+            print("Tracking:", end=" ")
         else:
             rel_name = 'admins'
+            print("Admin:", end=" ")
         accounts = functions.get_accounts(self.db_access, rel_name)
         print(accounts)
         listener = self.stream_handler.statuses.filter(
@@ -96,6 +98,9 @@ class AccountThread(threading.Thread):
         self.retweet = retweet
         self.follow = follow
         self.scrape = scrape
+        print("sleep_time=%s" % sleep_time)
+        print('fav=', self.fav)
+        print('retweet=%s, follow=%s, scrape=%s' % (self.retweet, self.follow, self.scrape))
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
@@ -106,11 +111,11 @@ class AccountThread(threading.Thread):
         while 1:
             cur = functions.get_cursor(self.db_access)
             word = functions.get_keyword(cur)
-            print("Chosen word:", word)
             # Add '-from:TheRealEqualizer' in the following line.
             tweets = self.handler.search.tweets(
-                q=word+subtract_string, count=199,
+                q=word+subtract_string, count=100,
                 lang="en")["statuses"]  # Understand OR operator.
+            print("Chosen word:", word)
 
             if self.follow:
                 friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
@@ -130,7 +135,6 @@ class AccountThread(threading.Thread):
             for tweet in tweets:
                 try:
                     if re.search(OFFENSIVE, tweet["text"]) is None:
-                        print("Search tag:", word)
                         if self.fav and functions.fav_tweet(self.handler, tweet):
                             functions.print_tweet(tweet)
                             print()
