@@ -20,7 +20,7 @@ import chirps.managers as managers
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-r", "--rate", default=60,
-    help="rate at which tweets are sent")
+    help="rate at which tweets are sent", type=int)
 args = parser.parse_args()
 
 try:
