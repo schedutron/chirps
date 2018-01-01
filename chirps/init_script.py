@@ -26,7 +26,7 @@ while True:
     words.append(word)
 
 for word in words:
-    cur.execute("INSERT INTO keywords VALUES(%s)", word)
+    cur.execute("INSERT INTO keywords VALUES(%s)", (word,))
 conn.commit()
 
 cur.execute("CREATE TABLE accounts(id bigint)")
@@ -39,7 +39,7 @@ while True:
         break
     accounts.append(int(account))
 for account in accounts:
-    cur.execute("INSERT INTO accounts VALUES(%s)", account)
+    cur.execute("INSERT INTO accounts VALUES(%s)", (account,))
 conn.commit()
 
 cur.execute("CREATE TABLE admins(id bigint)")
@@ -54,11 +54,11 @@ while True:
         break
     admins.append(int(admin))
 for admin in admins:
-    cur.execute("INSERT INTO admins VALUES(%s)", admin)
+    cur.execute("INSERT INTO admins VALUES(%s)", (admin,))
 conn.commit()
 
 cur.execute("CREATE TABLE messages(message varchar)")
-cur.commit()
+conn.commit()
 
 print("Enter reply messages one by one. When done, type 'exit':")
 messages = []
@@ -68,7 +68,7 @@ while True:
         break
     messages.append(messages)
 for message in messages:
-    cur.execute("INSERT INTO messages VALUES(%s)", message)
+    cur.execute("INSERT INTO messages VALUES(%s)", (message,))
 conn.commit()
 
 print("Database initialized successfully!")
