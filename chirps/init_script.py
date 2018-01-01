@@ -31,7 +31,7 @@ conn.commit()
 
 cur.execute("CREATE TABLE accounts(id bigint)")
 conn.commit()
-print("Enter account id's (NOT usernames) to be tracked, one by one. When done, type 'exit':")
+print("\nEnter account id's (NOT usernames) to be tracked, one by one. When done, type 'exit':")
 accounts = []
 while True:
     account = input()
@@ -45,7 +45,7 @@ conn.commit()
 cur.execute("CREATE TABLE admins(id bigint)")
 conn.commit()
 
-print("Enter admins' id's (NOT usernames) to be tracked, one by one. When done, type 'exit':")
+print("\nEnter admins' id's (NOT usernames) to be tracked, one by one. When done, type 'exit':")
 admins = []
 
 while True:
@@ -60,7 +60,7 @@ conn.commit()
 cur.execute("CREATE TABLE messages(message varchar)")
 conn.commit()
 
-print("Enter reply messages one by one. When done, type 'exit':")
+print("\nEnter reply messages one by one. When done, type 'exit':")
 messages = []
 while True:
     message = input()
@@ -71,21 +71,21 @@ for message in messages:
     cur.execute("INSERT INTO messages VALUES(%s)", (message,))
 conn.commit()
 
-print("Database initialized successfully!")
+print("\nDatabase initialized successfully!")
 
-print("Now enter your credentials: ")
+print("\nNow enter your credentials: ")
 
 access_token = input("Access token: ")
 access_secret = input("Access secret: ")
-consumer_token = input("Consumer token: ")
+consumer_key = input("Consumer key: ")
 consumer_secret = input("Consumer secret: ")
 shorte_st_token = input("shorte.st token: ")
 
-with open("chirps/credentials.py") as f:
+with open("chirps/credentials.py", "w") as f:
     f.write("ACCESS_TOKEN='%s'\n" % access_token)
     f.write("ACCESS_SECRET='%s'\n" % access_secret)
-    f.write("CONSUMER_TOKEN='%s'\n" % consumer_token)
+    f.write("CONSUMER_KEY='%s'\n" % consumer_key)
     f.write("CONSUMER_SECRET='%s'\n" % consumer_secret)
     f.write("DATABASE_URL='%s'\n" % args.db_url)
     f.write("SHORTE_ST_TOKEN='%s'\n" % shorte_st_token)
-print("credentials.py created successfully!")
+print("\ncredentials.py created successfully!")

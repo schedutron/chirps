@@ -19,6 +19,7 @@ import chirps.managers as managers
 # Also post images in replies.
 
 parser = argparse.ArgumentParser()
+# Add more argumets to choose follows, retweets and more...
 parser.add_argument("-r", "--rate", default=60,
     help="rate at which tweets are sent", type=int)
 args = parser.parse_args()
