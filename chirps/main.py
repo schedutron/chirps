@@ -3,6 +3,7 @@
 Main Twitter bot script which glues everything together and starts the managers.
 """
 import os
+import argparse
 from urllib import parse
 import psycopg2
 from twitter import Twitter, OAuth, TwitterStream
@@ -14,11 +15,13 @@ import chirps.managers as managers
 # A different idea - use cookies to visit shortened links via visitors' devices.
 # Maybe we can utilize 'RT to win' stuff by this same script.
 # Use the below link for image search.
-# https://www.google.co.in/search?site=imghp&tbm=isch&source=hp&biw=1280&bih=647&q=trump+funny+meme
+# https://www.google.co.in/search?site=imghp&tbm=isch&source=hp&biw=1280&bih=647&q=sample+query
 # Also post images in replies.
-# Implement PostgreSQL instead of reading from files.
 
-# Fix the weird error on Heroku about expecting bytes instead of string!
+parser = argparse.ArgumentParser()
+parser.add_argument("-r", "--rate", default=60,
+    help="rate at which tweets are sent")
+args = parser.parse_args()
 
 try:
     from chirps.credentials import *
@@ -46,7 +49,9 @@ def main():
     streamer = managers.StreamThread("Streamer",
         STREAM_HANDLER, ACCOUNT_HANDLER, url,
         functions.reply_with_shortened_url)  # For the troubling part.
-    account_manager = managers.AccountThread(ACCOUNT_HANDLER, UPLOAD_HANDLER, url, 60)  # For retweets, likes, follows.
+    # For retweets, likes, follows.
+    account_manager = managers.AccountThread(
+        ACCOUNT_HANDLER, UPLOAD_HANDLER, url, args.rate)
     admin = managers.StreamThread(
         "Admin", ADMIN_HANDLER, ACCESS_SECRET, url, functions.admin_action)
     streamer.start()
