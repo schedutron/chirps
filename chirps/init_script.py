@@ -89,3 +89,8 @@ with open("chirps/credentials.py", "w") as f:
     f.write("DATABASE_URL='%s'\n" % args.db_url)
     f.write("SHORTE_ST_TOKEN='%s'\n" % shorte_st_token)
 print("\ncredentials.py created successfully!")
+
+screen_name = input("Enter your Twitter username: ")
+with open("chirps/screen_name.py", "w") as f:
+    f.write("screen_name='%s'\n" % screen_name)
+print("\nscreen_name.py created successfully!")
