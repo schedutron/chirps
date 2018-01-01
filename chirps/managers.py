@@ -83,7 +83,7 @@ class StreamThread(threading.Thread):
 class AccountThread(threading.Thread):
     """Account thread manages favoriting, retweeting and following people who
     tweet interesting stuff."""
-    def __init__(self, handler, upload_handler, url, sleep_time):
+    def __init__(self, handler, upload_handler, url, sleep_time, fav, retweet, follow, scrape):
         threading.Thread.__init__(self)
         self.handler = handler
         self.upload_handler = upload_handler
@@ -92,6 +92,10 @@ class AccountThread(threading.Thread):
         self.cur = self.conn.cursor()
         self.db_access = {'conn': self.conn, 'cur': self.cur, 'url': url}  # To encapsulate db access data.
         self.sleep_time = sleep_time
+        self.fav = fav
+        self.retweet = retweet
+        self.follow = follow
+        self.scrape = scrape
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
@@ -108,35 +112,38 @@ class AccountThread(threading.Thread):
                 q=word+subtract_string, count=199,
                 lang="en")["statuses"]  # Understand OR operator.
 
+            if self.follow:
+                friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
+                if len(friends_ids) > 4000:
 
-            friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
-            if len(friends_ids) > 4000:
+                    # To unfollow old follows because Twitter doesn't allow a large
+                    # following / followers ratio for people with less followers.
+                    # Using 4000 instead of 5000 for 'safety', so that I'm able to
+                    # follow some interesting people manually even after a bot
+                    # crash.
 
-                # To unfollow old follows because Twitter doesn't allow a large
-                # following / followers ratio for people with less followers.
-                # Using 4000 instead of 5000 for 'safety', so that I'm able to
-                # follow some interesting people manually even after a bot
-                # crash.
+                    # Perhaps 1000 is the upper limit of mass unfollow in one go.
 
-                # Perhaps 1000 is the upper limit of mass unfollow in one go.
-
-                for _ in range(1000):
-                    functions.unfollow(self.handler, friends_ids.pop())
+                    for _ in range(1000):
+                        functions.unfollow(self.handler, friends_ids.pop())
 
             for tweet in tweets:
                 try:
                     if re.search(OFFENSIVE, tweet["text"]) is None:
                         print("Search tag:", word)
-                        functions.print_tweet(tweet)
-                        print()
-                        functions.fav_tweet(self.handler, tweet)
-                        functions.retweet(self.handler, tweet)
-                        self.handler.friendships.create(_id=tweet["user"]["id"])
-                        if "retweeted_status" in tweet:
-                            op = tweet["retweeted_status"]["user"]
-                            self.handler.friendships.create(_id=op["id"])
+                        if self.fav and functions.fav_tweet(self.handler, tweet):
+                            functions.print_tweet(tweet)
+                            print()
+                        if self.retweet and functions.retweet(self.handler, tweet) and not self.fav:
+                            functions.print_tweet(tweet)
+                            print()
+                        if self.follow:
+                            self.handler.friendships.create(_id=tweet["user"]["id"])
+                            if "retweeted_status" in tweet:
+                                op = tweet["retweeted_status"]["user"]
+                                self.handler.friendships.create(_id=op["id"])
 
-                    if not news:
+                    if self.scrape and not news:
                         news = functions.find_news()
                         item = news.pop()
                         if not re.search(

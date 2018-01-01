@@ -22,6 +22,14 @@ parser = argparse.ArgumentParser()
 # Add more argumets to choose follows, retweets and more...
 parser.add_argument("-r", "--rate", default=60,
     help="rate at which tweets are sent", type=int)
+parser.add_argument("--fav", help="flag to enable favoriting tweets",
+    type=bool, default=True)
+parser.add_argument("--retweet", help="flag to enable retweeting",
+    type=bool, default=True)
+parser.add_argument("--follow", help="flag to enable following people",
+    type=bool, default=True)
+parser.add_argument("--scrape", help="flag to enable content scraping",
+    type=bool, default=True)
 args = parser.parse_args()
 
 try:
@@ -52,7 +60,7 @@ def main():
         functions.reply_with_shortened_url)  # For the troubling part.
     # For retweets, likes, follows.
     account_manager = managers.AccountThread(
-        ACCOUNT_HANDLER, UPLOAD_HANDLER, url, args.rate)
+        ACCOUNT_HANDLER, UPLOAD_HANDLER, url, args.rate, fav, retweet, follow, scrape)
     admin = managers.StreamThread(
         "Admin", ADMIN_HANDLER, ACCESS_SECRET, url, functions.admin_action)
     streamer.start()
