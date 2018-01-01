@@ -86,5 +86,6 @@ with open("chirps/credentials.py") as f:
     f.write("ACCESS_SECRET='%s'\n" % access_secret)
     f.write("CONSUMER_TOKEN='%s'\n" % consumer_token)
     f.write("CONSUMER_SECRET='%s'\n" % consumer_secret)
+    f.write("DATABASE_URL='%s'\n" % args.db_url)
     f.write("SHORTE_ST_TOKEN='%s'\n" % shorte_st_token)
 print("credentials.py created successfully!")
