@@ -4,3 +4,4 @@ chirps/credentials.py
 bot/
 .vscode/
 chirps/screen_name.py
+chirps/__pycache__/

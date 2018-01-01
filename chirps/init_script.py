@@ -3,7 +3,7 @@
 # Bound to change (a lot!)
 
 import argparse
-from url.parse import urlparse
+from urllib.parse import urlparse
 from chirps.functions import db_connect
 
 parser = argparse.ArgumentParser()
