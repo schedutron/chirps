@@ -99,8 +99,10 @@ class AccountThread(threading.Thread):
         self.follow = follow
         self.scrape = scrape
         print("sleep_time=%s" % sleep_time)
-        print('fav=', self.fav)
-        print('retweet=%s, follow=%s, scrape=%s' % (self.retweet, self.follow, self.scrape))
+        print('fav: %s, retweet: %s, follow: %s, scrape: %s' % (self.fav,
+                                                                self.retweet,
+                                                                self.follow,
+                                                                self.scrape))
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
@@ -148,9 +150,9 @@ class AccountThread(threading.Thread):
                                 self.handler.friendships.create(_id=op["id"])
 
                     if self.scrape and not news:
-                        news = functions.find_news()
+                        news = functions.find_news(self.scrape)
                         item = news.pop()
-                        if len(item) > 1:
+                        if isinstance(item, tuple):
                             content = item[0]
                         else:
                             content = item
@@ -161,7 +163,7 @@ class AccountThread(threading.Thread):
 
                             # This uploads the relevant photo and gets it's
                             # id for attachment in tweet.
-                            if len(item) > 1:
+                            if isinstance(item, tuple):
                                 photo_id = self.upload_handler.media.upload(
                                     media=requests.get(item[1]).content
                                     )["media_id_string"]

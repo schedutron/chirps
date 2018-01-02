@@ -86,7 +86,13 @@ def unfollow(account_handler, iden):
 
 def get_tech_news():  # I'm adventuring with regular expressions for parsing!
     """Finds news for tweeting, along with their links."""
-
+    news_block_expr = re.compile(
+        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
+        r'<img.*?src="(.*?)".*?>.*?</a>'
+    )
+    latest_expr = re.compile(
+        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+    )
     nyTech = requests.get('https://nytimes.com/section/technology')
     latest = latest_expr.search(nyTech.text)
     news_blocks = news_block_expr.findall(latest.group(1))
@@ -98,26 +104,8 @@ def get_tech_news():  # I'm adventuring with regular expressions for parsing!
         if item[1].startswith('Daily Report: '):
             item = item[14:]
         news.append(item)
-
-    '''tv = requests.get('https://theverge.com', headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'})
-    feed_patt = r'(?s)<div class="c-compact-river">(.*?)<div class="l-col__sidebar"'
-    bunches = re.findall(feed_patt, tv.text)
-    verge_news = []
-    for cluster in bunches:
-        snippets = re.findall(r'<h2.*?><a.*>(.*?)</a></h2>', cluster)
-        verge_news.extend(snippets)
-    for item in verge_news:
-        news.append(parser.unescape(item))
-    random.shuffle(news) #to bring a feel of randomness'''
     return news
 
-
-def find_news(newsfuncs=['scrape_themerkle', 'get_tech_news']):
-    """Interface to get news from different news scraping functions."""
-    news = []
-    for func in newsfuncs:
-        news.extend(func())
-    return news
 
 def scrape_themerkle(num_pages=17):
     """Scrapes news links from themerkle.com"""
@@ -127,7 +115,16 @@ def scrape_themerkle(num_pages=17):
         tree = fromstring(r.content)
         collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
         links.extend(collection)
+    links.reverse()  # To post newer content first.
     return links
+
+
+def find_news(newsfuncs):
+    """Interface to get news from different news scraping functions."""
+    news = []
+    for func in newsfuncs:
+        news.extend(globals()[func]())
+    return news
 
 
 def shorten_url(url):
@@ -270,26 +267,3 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
 def admin_action(kwargs):
     """Function to manage different administrator tasks."""
     pass
-
-
-def find_news():  # I'm adventuring with regular expressions for parsing!
-    """Finds news for tweeting, along with their links."""
-    news_block_expr = re.compile(
-        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
-        r'<img.*?src="(.*?)".*?>.*?</a>'
-    )
-    latest_expr = re.compile(
-        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
-    )
-    nyTech = requests.get('https://nytimes.com/section/technology')
-    latest = latest_expr.search(nyTech.text)
-    news_blocks = news_block_expr.findall(latest.group(1))
-    news = []
-    for i in range(len(news_blocks)):
-        item = (
-            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
-            news_blocks[i][2].strip())  # This is img src.
-        if item[1].startswith('Daily Report: '):
-            item = item[14:]
-        news.append(item)
-    return news
