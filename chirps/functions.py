@@ -128,10 +128,12 @@ def scrape_themerkle(num_pages=17):
         para = tokenizer.tokenize(para)
         # To fix unicode issues:
         para = [unicodedata.normalize('NFKD', text) for text in para]
-        while True:
+        for i in range(10):
             text = random.choice(para)
             if text and 60 < len(text) < 210:
                 break
+        else:
+            continue
         yield '"%s" %s' % (text, link)
 
 
