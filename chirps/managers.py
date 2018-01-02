@@ -150,21 +150,28 @@ class AccountThread(threading.Thread):
                     if self.scrape and not news:
                         news = functions.find_news()
                         item = news.pop()
+                        if len(item) > 1:
+                            content = item[0]
+                        else:
+                            content = item
                         if not re.search(
-                            r'(?i)this|follow|search articles', item[0]
+                            r'(?i)this|follow|search articles', content
                             ):
-                            print("Scraped: ", item[0])
+                            print("Scraped: ", content)
 
                             # This uploads the relevant photo and gets it's
                             # id for attachment in tweet.
-                            photo_id = self.upload_handler.media.upload(
-                                media=requests.get(item[1]).content
-                                )["media_id_string"]
+                            if len(item) > 1:
+                                photo_id = self.upload_handler.media.upload(
+                                    media=requests.get(item[1]).content
+                                    )["media_id_string"]
 
-                            self.handler.statuses.update(
-                                status=item[0],
-                                media_ids=photo_id
-                                )
+                                self.handler.statuses.update(
+                                    status=item[0],
+                                    media_ids=photo_id
+                                    )
+                            else:
+                                self.handler.statuses.update(status=content)
                 except Exception as exception:
                     print(exception)
                 time.sleep(self.sleep_time)

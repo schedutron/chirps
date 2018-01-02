@@ -1,6 +1,7 @@
 "This script contains useful functions for building the Twitter bot."
 
 import json
+import random
 import re
 
 import psycopg2  # We're using postgres as our database system.
@@ -81,6 +82,52 @@ def unfollow(account_handler, iden):
         return 0
     except TwitterHTTPError:
         return 1
+
+
+def get_tech_news():  # I'm adventuring with regular expressions for parsing!
+    """Finds news for tweeting, along with their links."""
+
+    nyTech = requests.get('https://nytimes.com/section/technology')
+    latest = latest_expr.search(nyTech.text)
+    news_blocks = news_block_expr.findall(latest.group(1))
+    news = []
+    for i in range(len(news_blocks)):
+        item = (
+            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
+            news_blocks[i][2].strip())  # This is img src.
+        if item[1].startswith('Daily Report: '):
+            item = item[14:]
+        news.append(item)
+
+    '''tv = requests.get('https://theverge.com', headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'})
+    feed_patt = r'(?s)<div class="c-compact-river">(.*?)<div class="l-col__sidebar"'
+    bunches = re.findall(feed_patt, tv.text)
+    verge_news = []
+    for cluster in bunches:
+        snippets = re.findall(r'<h2.*?><a.*>(.*?)</a></h2>', cluster)
+        verge_news.extend(snippets)
+    for item in verge_news:
+        news.append(parser.unescape(item))
+    random.shuffle(news) #to bring a feel of randomness'''
+    return news
+
+
+def find_news(newsfuncs=['scrape_themerkle', 'get_tech_news']):
+    """Interface to get news from different news scraping functions."""
+    news = []
+    for func in newsfuncs:
+        news.extend(func())
+    return news
+
+def scrape_themerkle(num_pages=17):
+    """Scrapes news links from themerkle.com"""
+    links = []
+    for i in range(num_pages):
+        r = requests.get("https://themerkle.com/page/%i" % (i+1))
+        tree = fromstring(r.content)
+        collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
+        links.extend(collection)
+    return links
 
 
 def shorten_url(url):
@@ -185,7 +232,6 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #         max_word = word
 
     # Searches for a related news, later add images.
-    news_content = get_top_headline(tweet["user"]["name"])
 
     # rep_tweet = self.handler.search.tweets(
     #     q=tweet["user"]["name"],
@@ -198,6 +244,7 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #     + "/status/"+rep_tweet["id_str"]
     shorten_url = ''
     if use_short_url:
+        news_content = get_top_headline(tweet["user"]["name"])
         short_url = shorten_url(news_content[1])
     # message = random.choice(messages) + " " + short_url
     # Instead of a catchy but unrelated text, tweet the headline
