@@ -8,6 +8,7 @@ import random
 import re
 import time
 import threading
+import traceback
 from urllib import parse  # For database connection/
 
 import requests
@@ -58,7 +59,7 @@ class StreamThread(threading.Thread):
             print("Tracking:", end=" ")
         else:
             rel_name = 'admins'
-            print("Admin:", end=" ")
+            print("Admins:", end=" ")
         accounts = functions.get_accounts(self.db_access, rel_name)
         print(accounts)
         listener = self.stream_handler.statuses.filter(
@@ -98,19 +99,17 @@ class AccountThread(threading.Thread):
         self.retweet = retweet
         self.follow = follow
         self.scrape = scrape
-        print("sleep_time=%s" % sleep_time)
-        print('fav: %s, retweet: %s, follow: %s, scrape: %s' % (self.fav,
-                                                                self.retweet,
-                                                                self.follow,
-                                                                self.scrape))
+        print('sleep_time: %s, fav: %s, retweet: %s, follow: %s, scrape: %s' %
+              (self.sleep_time, self.fav, self.retweet, self.follow, self.scrape)
+             )
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
 
         print("Account Manager started.")
-        news = []
+        news = functions.find_news(self.scrape)
         subtract_string = ' -from:%s' % screen_name  # For not extracting self's tweets.
-        while 1:
+        while True:
             cur = functions.get_cursor(self.db_access)
             word = functions.get_keyword(cur)
             # Add '-from:TheRealEqualizer' in the following line.
@@ -149,9 +148,12 @@ class AccountThread(threading.Thread):
                                 op = tweet["retweeted_status"]["user"]
                                 self.handler.friendships.create(_id=op["id"])
 
-                    if self.scrape and not news:
-                        news = functions.find_news(self.scrape)
-                        item = news.pop()
+                    if self.scrape:
+                        try:
+                            item = next(news)
+                        except StopIteration:
+                            news = functions.find_news(self.scrape)
+                            item = next(news)
                         if isinstance(item, tuple):
                             content = item[0]
                         else:
@@ -176,4 +178,5 @@ class AccountThread(threading.Thread):
                                 self.handler.statuses.update(status=content)
                 except Exception as exception:
                     print(exception)
+                    traceback.print_exc()
                 time.sleep(self.sleep_time)

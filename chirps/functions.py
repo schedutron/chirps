@@ -3,10 +3,13 @@
 import json
 import random
 import re
+import unicodedata
 
 import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
+import nltk  # Used here to split paragraphs into sentences.
+nltk.download('punkt')
 from twitter import TwitterHTTPError
 
 def reply(account_handler, tweet_id, user_name, msg):
@@ -103,8 +106,7 @@ def get_tech_news():  # I'm adventuring with regular expressions for parsing!
             news_blocks[i][2].strip())  # This is img src.
         if item[1].startswith('Daily Report: '):
             item = item[14:]
-        news.append(item)
-    return news
+        yield item
 
 
 def scrape_themerkle(num_pages=17):
@@ -115,16 +117,35 @@ def scrape_themerkle(num_pages=17):
         tree = fromstring(r.content)
         collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
         links.extend(collection)
-    links.reverse()  # To post newer content first.
-    return links
+
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    for link in links:
+        r = requests.get(link)
+        tree = fromstring(r.content)
+        paras = tree.xpath('//div[@class="thecontent"]/p')
+        paras = [para.text_content() for para in paras if para.text_content()]
+        para = random.choice(paras)
+        para = tokenizer.tokenize(para)
+        # To fix unicode issues:
+        para = [unicodedata.normalize('NFKD', text) for text in para]
+        while True:
+            text = random.choice(para)
+            if text and 60 < len(text) < 210:
+                break
+        yield '"%s" %s' % (text, link)
 
 
 def find_news(newsfuncs):
     """Interface to get news from different news scraping functions."""
-    news = []
+    news_iterators = []
     for func in newsfuncs:
-        news.extend(globals()[func]())
-    return news
+        news_iterators.append(globals()[func]())
+    while True:
+        for i, iterator in enumerate(news_iterators):
+            try:
+                yield next(iterator)
+            except StopIteration:
+                news_iterators[i] = globals()[newsfuncs[i]]()
 
 
 def shorten_url(url):

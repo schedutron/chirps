@@ -14,3 +14,4 @@ six==1.11.0
 twilio==6.8.4
 twitter==1.17.1
 urllib3==1.22
+nltk
