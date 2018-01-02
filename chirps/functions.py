@@ -1,18 +1,16 @@
 "This script contains useful functions for building the Twitter bot."
 
 import json
+import random
 import re
+import unicodedata
 
 import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
+import nltk  # Used here to split paragraphs into sentences.
+nltk.download('punkt')
 from twitter import TwitterHTTPError
-
-try:
-    from chirps.credentials import SHORTE_ST_TOKEN
-except:
-    import os
-    SHORTE_ST_TOKEN = os.environ['SHORTE_ST_TOKEN']
 
 def reply(account_handler, tweet_id, user_name, msg):
     """
@@ -89,9 +87,70 @@ def unfollow(account_handler, iden):
         return 1
 
 
+def get_tech_news():  # I'm adventuring with regular expressions for parsing!
+    """Finds news for tweeting, along with their links."""
+    news_block_expr = re.compile(
+        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
+        r'<img.*?src="(.*?)".*?>.*?</a>'
+    )
+    latest_expr = re.compile(
+        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+    )
+    nyTech = requests.get('https://nytimes.com/section/technology')
+    latest = latest_expr.search(nyTech.text)
+    news_blocks = news_block_expr.findall(latest.group(1))
+    news = []
+    for i in range(len(news_blocks)):
+        item = (
+            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
+            news_blocks[i][2].strip())  # This is img src.
+        if item[1].startswith('Daily Report: '):
+            item = item[14:]
+        yield item
+
+
+def scrape_themerkle(num_pages=17):
+    """Scrapes news links from themerkle.com"""
+    links = []
+    for i in range(num_pages):
+        r = requests.get("https://themerkle.com/page/%i" % (i+1))
+        tree = fromstring(r.content)
+        collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
+        links.extend(collection)
+
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    for link in links:
+        r = requests.get(link)
+        tree = fromstring(r.content)
+        paras = tree.xpath('//div[@class="thecontent"]/p')
+        paras = [para.text_content() for para in paras if para.text_content()]
+        para = random.choice(paras)
+        para = tokenizer.tokenize(para)
+        # To fix unicode issues:
+        para = [unicodedata.normalize('NFKD', text) for text in para]
+        while True:
+            text = random.choice(para)
+            if text and 60 < len(text) < 210:
+                break
+        yield '"%s" %s' % (text, link)
+
+
+def find_news(newsfuncs):
+    """Interface to get news from different news scraping functions."""
+    news_iterators = []
+    for func in newsfuncs:
+        news_iterators.append(globals()[func]())
+    while True:
+        for i, iterator in enumerate(news_iterators):
+            try:
+                yield next(iterator)
+            except StopIteration:
+                news_iterators[i] = globals()[newsfuncs[i]]()
+
+
 def shorten_url(url):
     """Shortens the passed url using shorte.st's API."""
-
+    from chirps.credentials import SHORTE_ST_TOKEN
     response = requests.put(
         "https://api.shorte.st/v1/data/url",
         {"urlToShorten": url}, headers={"public-api-token": SHORTE_ST_TOKEN}
@@ -191,7 +250,6 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #         max_word = word
 
     # Searches for a related news, later add images.
-    news_content = get_top_headline(tweet["user"]["name"])
 
     # rep_tweet = self.handler.search.tweets(
     #     q=tweet["user"]["name"],
@@ -204,6 +262,7 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #     + "/status/"+rep_tweet["id_str"]
     shorten_url = ''
     if use_short_url:
+        news_content = get_top_headline(tweet["user"]["name"])
         short_url = shorten_url(news_content[1])
     # message = random.choice(messages) + " " + short_url
     # Instead of a catchy but unrelated text, tweet the headline
@@ -229,26 +288,3 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
 def admin_action(kwargs):
     """Function to manage different administrator tasks."""
     pass
-
-
-def find_news():  # I'm adventuring with regular expressions for parsing!
-    """Finds news for tweeting, along with their links."""
-    news_block_expr = re.compile(
-        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
-        r'<img.*?src="(.*?)".*?>.*?</a>'
-    )
-    latest_expr = re.compile(
-        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
-    )
-    nyTech = requests.get('https://nytimes.com/section/technology')
-    latest = latest_expr.search(nyTech.text)
-    news_blocks = news_block_expr.findall(latest.group(1))
-    news = []
-    for i in range(len(news_blocks)):
-        item = (
-            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
-            news_blocks[i][2].strip())  # This is img src.
-        if item[1].startswith('Daily Report: '):
-            item = item[14:]
-        news.append(item)
-    return news
