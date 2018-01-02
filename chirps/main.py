@@ -27,8 +27,8 @@ parser.add_argument("--retweet", help="flag to enable retweeting",
                     action="store_true")
 parser.add_argument("--follow", help="flag to enable following people",
                     action="store_true")
-parser.add_argument("--scrape", help="flag to enable content scraping",
-                    action="store_true")
+parser.add_argument("--scrape", help="flag to specify content scraping",
+                    default="", nargs="*")
 args = parser.parse_args()
 
 try:

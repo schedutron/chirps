@@ -1,6 +1,7 @@
 "This script contains useful functions for building the Twitter bot."
 
 import json
+import random
 import re
 
 import psycopg2  # We're using postgres as our database system.
@@ -81,6 +82,49 @@ def unfollow(account_handler, iden):
         return 0
     except TwitterHTTPError:
         return 1
+
+
+def get_tech_news():  # I'm adventuring with regular expressions for parsing!
+    """Finds news for tweeting, along with their links."""
+    news_block_expr = re.compile(
+        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
+        r'<img.*?src="(.*?)".*?>.*?</a>'
+    )
+    latest_expr = re.compile(
+        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+    )
+    nyTech = requests.get('https://nytimes.com/section/technology')
+    latest = latest_expr.search(nyTech.text)
+    news_blocks = news_block_expr.findall(latest.group(1))
+    news = []
+    for i in range(len(news_blocks)):
+        item = (
+            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
+            news_blocks[i][2].strip())  # This is img src.
+        if item[1].startswith('Daily Report: '):
+            item = item[14:]
+        news.append(item)
+    return news
+
+
+def scrape_themerkle(num_pages=17):
+    """Scrapes news links from themerkle.com"""
+    links = []
+    for i in range(num_pages):
+        r = requests.get("https://themerkle.com/page/%i" % (i+1))
+        tree = fromstring(r.content)
+        collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
+        links.extend(collection)
+    links.reverse()  # To post newer content first.
+    return links
+
+
+def find_news(newsfuncs):
+    """Interface to get news from different news scraping functions."""
+    news = []
+    for func in newsfuncs:
+        news.extend(globals()[func]())
+    return news
 
 
 def shorten_url(url):
@@ -185,7 +229,6 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #         max_word = word
 
     # Searches for a related news, later add images.
-    news_content = get_top_headline(tweet["user"]["name"])
 
     # rep_tweet = self.handler.search.tweets(
     #     q=tweet["user"]["name"],
@@ -198,6 +241,7 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #     + "/status/"+rep_tweet["id_str"]
     shorten_url = ''
     if use_short_url:
+        news_content = get_top_headline(tweet["user"]["name"])
         short_url = shorten_url(news_content[1])
     # message = random.choice(messages) + " " + short_url
     # Instead of a catchy but unrelated text, tweet the headline
@@ -223,26 +267,3 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
 def admin_action(kwargs):
     """Function to manage different administrator tasks."""
     pass
-
-
-def find_news():  # I'm adventuring with regular expressions for parsing!
-    """Finds news for tweeting, along with their links."""
-    news_block_expr = re.compile(
-        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
-        r'<img.*?src="(.*?)".*?>.*?</a>'
-    )
-    latest_expr = re.compile(
-        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
-    )
-    nyTech = requests.get('https://nytimes.com/section/technology')
-    latest = latest_expr.search(nyTech.text)
-    news_blocks = news_block_expr.findall(latest.group(1))
-    news = []
-    for i in range(len(news_blocks)):
-        item = (
-            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
-            news_blocks[i][2].strip())  # This is img src.
-        if item[1].startswith('Daily Report: '):
-            item = item[14:]
-        news.append(item)
-    return news

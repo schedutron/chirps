@@ -98,6 +98,11 @@ class AccountThread(threading.Thread):
         self.retweet = retweet
         self.follow = follow
         self.scrape = scrape
+        print("sleep_time=%s" % sleep_time)
+        print('fav: %s, retweet: %s, follow: %s, scrape: %s' % (self.fav,
+                                                                self.retweet,
+                                                                self.follow,
+                                                                self.scrape))
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
@@ -145,23 +150,30 @@ class AccountThread(threading.Thread):
                                 self.handler.friendships.create(_id=op["id"])
 
                     if self.scrape and not news:
-                        news = functions.find_news()
+                        news = functions.find_news(self.scrape)
                         item = news.pop()
+                        if isinstance(item, tuple):
+                            content = item[0]
+                        else:
+                            content = item
                         if not re.search(
-                            r'(?i)this|follow|search articles', item[0]
+                            r'(?i)this|follow|search articles', content
                             ):
-                            print("Scraped: ", item[0])
+                            print("Scraped: ", content)
 
                             # This uploads the relevant photo and gets it's
                             # id for attachment in tweet.
-                            photo_id = self.upload_handler.media.upload(
-                                media=requests.get(item[1]).content
-                                )["media_id_string"]
+                            if isinstance(item, tuple):
+                                photo_id = self.upload_handler.media.upload(
+                                    media=requests.get(item[1]).content
+                                    )["media_id_string"]
 
-                            self.handler.statuses.update(
-                                status=item[0],
-                                media_ids=photo_id
-                                )
+                                self.handler.statuses.update(
+                                    status=item[0],
+                                    media_ids=photo_id
+                                    )
+                            else:
+                                self.handler.statuses.update(status=content)
                 except Exception as exception:
                     print(exception)
                 time.sleep(self.sleep_time)
