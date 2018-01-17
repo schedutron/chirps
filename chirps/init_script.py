@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Script for initializing credentials and database for the bot."""
 # Bound to change (a lot!)
+# Add functionality to add screen_name.
 
 import argparse
 from urllib.parse import urlparse
