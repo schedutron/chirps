@@ -5,12 +5,17 @@ import random
 import re
 import unicodedata
 
+from datetime import datetime
+
 import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
 import nltk  # Used here to split paragraphs into sentences.
 nltk.download('punkt')
 from twitter import TwitterHTTPError
+
+# tokenizer is used in scraping.
+tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
 def reply(account_handler, tweet_id, user_name, msg):
     """
@@ -87,6 +92,29 @@ def unfollow(account_handler, iden):
         return 1
 
 
+def extract_paratext(paras):
+    """Extracts text from <p> elements and returns a clean, tokenized random
+    paragraph."""
+
+    paras = [para.text_content() for para in paras if para.text_content()]
+    para = random.choice(paras)
+    para = tokenizer.tokenize(para)
+    # To fix unicode issues:
+    return [unicodedata.normalize('NFKD', text) for text in para]
+
+
+def extract_text(para):
+    """Returns a sufficiently-large random text from a tokenized paragraph,
+    if such text exists. Otherwise, returns None."""
+
+    for _ in range(10):
+        text = random.choice(para)
+        if text and 60 < len(text) < 210:
+            return text
+    
+    return None
+
+
 def get_tech_news():  # I'm adventuring with regular expressions for parsing!
     """Finds news for tweeting, along with their links."""
     news_block_expr = re.compile(
@@ -118,22 +146,15 @@ def scrape_themerkle(num_pages=17):
         collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
         links.extend(collection)
 
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
     for link in links:
         r = requests.get(link)
         tree = fromstring(r.content)
         paras = tree.xpath('//div[@class="thecontent"]/p')
-        paras = [para.text_content() for para in paras if para.text_content()]
-        para = random.choice(paras)
-        para = tokenizer.tokenize(para)
-        # To fix unicode issues:
-        para = [unicodedata.normalize('NFKD', text) for text in para]
-        for i in range(10):
-            text = random.choice(para)
-            if text and 60 < len(text) < 210:
-                break
-        else:
+        paras = extract_paratext(paras)
+        text = extract_text(para)
+        if not text:
             continue
+
         yield '"%s" %s' % (text, link)
 
 
