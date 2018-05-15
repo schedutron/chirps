@@ -150,8 +150,32 @@ def scrape_themerkle(num_pages=17):
         r = requests.get(link)
         tree = fromstring(r.content)
         paras = tree.xpath('//div[@class="thecontent"]/p')
-        paras = extract_paratext(paras)
+        para = extract_paratext(paras)
         text = extract_text(para)
+        if not text:
+            continue
+
+        yield '"%s" %s' % (text, link)
+
+
+def scrape_udacity():
+    """Scrapes content from the Udacity blog."""
+    now = datetime.now()
+    url = 'https://blog.udacity.com/%s/%s' % (now.year, now.month)
+    headers = headers={
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5)'
+                      ' AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'
+        }
+    r = requests.get(url, headers=headers)
+    tree = fromstring(r.content)
+    links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
+
+    for link in links:
+        r = requests.get(link, headers=headers)
+        blog_tree = fromstring(r.content)
+        paras = blog_tree.xpath('//div[@id="quotablecontent"]/p')
+        para = extract_paratext(paras)  # Gets a random paragraph.
+        text = extract_text(para)  # Gets a good-enough random text quote.
         if not text:
             continue
 
