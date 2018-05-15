@@ -1,12 +1,21 @@
 "This script contains useful functions for building the Twitter bot."
 
 import json
+import random
 import re
+import unicodedata
+
+from datetime import datetime
 
 import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
+import nltk  # Used here to split paragraphs into sentences.
+nltk.download('punkt')
 from twitter import TwitterHTTPError
+
+# tokenizer is used in scraping.
+tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
 def reply(account_handler, tweet_id, user_name, msg):
     """
@@ -81,6 +90,109 @@ def unfollow(account_handler, iden):
         return 0
     except TwitterHTTPError:
         return 1
+
+
+def extract_paratext(paras):
+    """Extracts text from <p> elements and returns a clean, tokenized random
+    paragraph."""
+
+    paras = [para.text_content() for para in paras if para.text_content()]
+    para = random.choice(paras)
+    para = tokenizer.tokenize(para)
+    # To fix unicode issues:
+    return [unicodedata.normalize('NFKD', text) for text in para]
+
+
+def extract_text(para):
+    """Returns a sufficiently-large random text from a tokenized paragraph,
+    if such text exists. Otherwise, returns None."""
+
+    for _ in range(10):
+        text = random.choice(para)
+        if text and 60 < len(text) < 210:
+            return text
+    
+    return None
+
+
+def get_tech_news():  # I'm adventuring with regular expressions for parsing!
+    """Finds news for tweeting, along with their links."""
+    news_block_expr = re.compile(
+        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
+        r'<img.*?src="(.*?)".*?>.*?</a>'
+    )
+    latest_expr = re.compile(
+        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+    )
+    nyTech = requests.get('https://nytimes.com/section/technology')
+    latest = latest_expr.search(nyTech.text)
+    news_blocks = news_block_expr.findall(latest.group(1))
+    news = []
+    for i in range(len(news_blocks)):
+        item = (
+            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
+            news_blocks[i][2].strip())  # This is img src.
+        if item[1].startswith('Daily Report: '):
+            item = item[14:]
+        yield item
+
+
+def scrape_themerkle(num_pages=17):
+    """Scrapes news links from themerkle.com"""
+    links = []
+    for i in range(num_pages):
+        r = requests.get("https://themerkle.com/page/%i" % (i+1))
+        tree = fromstring(r.content)
+        collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
+        links.extend(collection)
+
+    for link in links:
+        r = requests.get(link)
+        tree = fromstring(r.content)
+        paras = tree.xpath('//div[@class="thecontent"]/p')
+        para = extract_paratext(paras)
+        text = extract_text(para)
+        if not text:
+            continue
+
+        yield '"%s" %s' % (text, link)
+
+
+def scrape_udacity():
+    """Scrapes content from the Udacity blog."""
+    now = datetime.now()
+    url = 'https://blog.udacity.com/%s/%s' % (now.year, now.month)
+    headers = headers={
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5)'
+                      ' AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'
+        }
+    r = requests.get(url, headers=headers)
+    tree = fromstring(r.content)
+    links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
+
+    for link in links:
+        r = requests.get(link, headers=headers)
+        blog_tree = fromstring(r.content)
+        paras = blog_tree.xpath('//div[@id="quotablecontent"]/p')
+        para = extract_paratext(paras)  # Gets a random paragraph.
+        text = extract_text(para)  # Gets a good-enough random text quote.
+        if not text:
+            continue
+
+        yield '"%s" %s' % (text, link)
+
+
+def find_news(newsfuncs):
+    """Interface to get news from different news scraping functions."""
+    news_iterators = []
+    for func in newsfuncs:
+        news_iterators.append(globals()[func]())
+    while True:
+        for i, iterator in enumerate(news_iterators):
+            try:
+                yield next(iterator)
+            except StopIteration:
+                news_iterators[i] = globals()[newsfuncs[i]]()
 
 
 def shorten_url(url):
@@ -185,7 +297,6 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #         max_word = word
 
     # Searches for a related news, later add images.
-    news_content = get_top_headline(tweet["user"]["name"])
 
     # rep_tweet = self.handler.search.tweets(
     #     q=tweet["user"]["name"],
@@ -198,6 +309,7 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #     + "/status/"+rep_tweet["id_str"]
     shorten_url = ''
     if use_short_url:
+        news_content = get_top_headline(tweet["user"]["name"])
         short_url = shorten_url(news_content[1])
     # message = random.choice(messages) + " " + short_url
     # Instead of a catchy but unrelated text, tweet the headline
@@ -223,26 +335,3 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
 def admin_action(kwargs):
     """Function to manage different administrator tasks."""
     pass
-
-
-def find_news():  # I'm adventuring with regular expressions for parsing!
-    """Finds news for tweeting, along with their links."""
-    news_block_expr = re.compile(
-        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
-        r'<img.*?src="(.*?)".*?>.*?</a>'
-    )
-    latest_expr = re.compile(
-        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
-    )
-    nyTech = requests.get('https://nytimes.com/section/technology')
-    latest = latest_expr.search(nyTech.text)
-    news_blocks = news_block_expr.findall(latest.group(1))
-    news = []
-    for i in range(len(news_blocks)):
-        item = (
-            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
-            news_blocks[i][2].strip())  # This is img src.
-        if item[1].startswith('Daily Report: '):
-            item = item[14:]
-        news.append(item)
-    return news
