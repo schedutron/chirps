@@ -111,7 +111,7 @@ def extract_text(para):
         text = random.choice(para)
         if text and 60 < len(text) < 210:
             return text
-    
+
     return None
 
 
@@ -169,7 +169,6 @@ def scrape_udacity():
     r = requests.get(url, headers=headers)
     tree = fromstring(r.content)
     links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
-
     for link in links:
         r = requests.get(link, headers=headers)
         blog_tree = fromstring(r.content)
@@ -178,7 +177,6 @@ def scrape_udacity():
         text = extract_text(para)  # Gets a good-enough random text quote.
         if not text:
             continue
-
         yield '"%s" %s' % (text, link)
 
 
