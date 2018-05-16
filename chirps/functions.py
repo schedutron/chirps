@@ -262,7 +262,7 @@ def reply_with_shortened_url(kwargs, use_short_url=False):  # Note the nontradit
     #     "https://twitter.com/"\
     #     + rep_tweet["user"]["screen_name"]\
     #     + "/status/"+rep_tweet["id_str"]
-    shorten_url = ''
+    short_url = ''
     if use_short_url:
         news_content = get_top_headline(tweet["user"]["name"])
         short_url = shorten_url(news_content[1])
