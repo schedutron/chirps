@@ -162,7 +162,7 @@ def scrape_udacity():
     """Scrapes content from the Udacity blog."""
     now = datetime.now()
     url = 'https://blog.udacity.com/%s/%s' % (now.year, now.month)
-    headers = headers={
+    headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5)'
                       ' AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'
         }
