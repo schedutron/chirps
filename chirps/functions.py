@@ -16,6 +16,11 @@ from twitter import TwitterHTTPError
 
 # tokenizer is used in scraping.
 tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+# headers are also used in scraping.
+HEADERS = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5)'
+                      ' AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'
+        }
 
 def reply(account_handler, tweet_id, user_name, msg):
     """
@@ -162,21 +167,36 @@ def scrape_udacity():
     """Scrapes content from the Udacity blog."""
     now = datetime.now()
     url = 'https://blog.udacity.com/%s/%s' % (now.year, now.month)
-    headers = headers={
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5)'
-                      ' AppleWebKit/537.36 (KHTML, like Gecko) Cafari/537.36'
-        }
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=HEADERS)
     tree = fromstring(r.content)
     links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
     for link in links:
-        r = requests.get(link, headers=headers)
+        r = requests.get(link, headers=HEADERS)
         blog_tree = fromstring(r.content)
         paras = blog_tree.xpath('//div[@id="quotablecontent"]/p')
         para = extract_paratext(paras)  # Gets a random paragraph.
         text = extract_text(para)  # Gets a good-enough random text quote.
         if not text:
             continue
+        yield '"%s" %s' % (text, link)
+
+
+def scrape_coursera():
+    """Scrapes content from the Coursera blog."""
+    url = 'https://blog.coursera.org'
+    r = requests.get(url, headers=HEADERS)
+    tree = fromstring(r.content)
+    links = tree.xpath('//div[@class="recent"]//div[@class="title"]/a/@href')
+
+    for link in links:
+        r = requests.get(link, headers=HEADERS)
+        blog_tree = fromstring(r.content)
+        paras = blog_tree.xpath('//div[@class="entry-content"]/p')
+        para = extract_paratext(paras)  # Gets a random paragraph.
+        text = extract_text(para)  # Gets a good-enough random text quote.
+        if not text:
+            continue
+        
         yield '"%s" %s' % (text, link)
 
 
