@@ -6,6 +6,7 @@ import re
 import unicodedata
 
 from datetime import datetime
+from urllib.parse import urlparse
 
 import psycopg2  # We're using postgres as our database system.
 import requests
@@ -194,6 +195,27 @@ def scrape_coursera():
         paras = blog_tree.xpath('//div[@class="entry-content"]/p')
         para = extract_paratext(paras)  # Gets a random paragraph.
         text = extract_text(para)  # Gets a good-enough random text quote.
+        if not text:
+            continue
+        
+        yield '"%s" %s' % (text, link)
+
+
+def scrape_classcentral():
+    """Scrapes content from Class Central Reports."""
+    url = 'https://class-central.com/report'
+    r = requests.get(url, headers=HEADERS)
+    tree = fromstring(r.content)
+    links = [urljoin(url, link) for link in tree.xpath('//article/a/@href')]
+    del tree  # tree no longer needed in memory
+
+    for link in links:
+        r = requests.get(link)
+        blog_tree = r.content()
+        paras = blog_tree.xpath('//div[@class="entry-content"]/p')
+        para = extract_paratext(paras)  # Gets a random paragraph.
+        text = extract_text(para)  # Gets a good-enough random text quote.
+
         if not text:
             continue
         
