@@ -1,4 +1,5 @@
-"This script contains useful functions for building the Twitter bot."
+"""This script contains useful functions for building the Twitter bot.
+It also has scrapers for building the information feed."""
 
 import json
 import random
