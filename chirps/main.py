@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Consider hosting on a Raspberry Pi.
 """
 Main Twitter bot script which glues everything together and starts the managers.
 """
