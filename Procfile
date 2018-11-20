@@ -1,1 +1,1 @@
-worker: python3 -m chirps.main --rate=600 --fav --scrape scrape_udacity scrape_coursera scrape_classcentral
+worker: python3 -m chirps.main --rate=300 --fav --retweet --follow --scrape scrape_themerkle get_tech_news
