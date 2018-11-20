@@ -90,20 +90,21 @@ def unfollow(account_handler, iden):
 def get_tech_news():  # I'm adventuring with regular expressions for parsing!
     """Finds news for tweeting, along with their links."""
     news_block_expr = re.compile(
-        r'(?s)<a class="story-link".*?href="(.*?)".*?>.*?<h2.*?>(.*?)</h2>.*?'
-        r'<img.*?src="(.*?)".*?>.*?</a>'
+        r'(?s)<li.*?a href="(.*?)".*?>.*?<img.*?src="(.*?)".*?>'
+        r'<h2.*?>(.*?)</h2>.*?</a>'
     )
     latest_expr = re.compile(
-        r'(?s)<ol class="story-menu theme-stream initial-set">(.*)</ol>'
+        r'(?s)<section id="stream-panel".*ol>(.*)</ol>'
     )
     nyTech = requests.get('https://nytimes.com/section/technology')
     latest = latest_expr.search(nyTech.text)
     news_blocks = news_block_expr.findall(latest.group(1))
-    news = []
+
     for i in range(len(news_blocks)):
         item = (
-            news_blocks[i][1].strip() + ' ' + shorten_url(news_blocks[i][0]),
-            news_blocks[i][2].strip())  # This is img src.
+            news_blocks[i][2].strip() + ' ' + shorten_url(
+                'https://nytimes.com'+news_blocks[i][0]),
+            news_blocks[i][1].strip())  # This is img src.
         if item[1].startswith('Daily Report: '):
             item = item[14:]
         yield item
@@ -152,6 +153,9 @@ def find_news(newsfuncs):
 
 def shorten_url(url):
     """Shortens the passed url using shorte.st's API."""
+    # QUICK AND DIRTY AND TEMPORARY STUFF:
+    return url
+    
     from chirps.credentials import SHORTE_ST_TOKEN
     response = requests.put(
         "https://api.shorte.st/v1/data/url",
