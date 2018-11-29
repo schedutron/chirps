@@ -224,6 +224,33 @@ def scrape_classcentral():
         yield '"%s" %s' % (text, link)
 
 
+def scrape_thenewstack():
+    """Scrapes news from thenewstack.io"""
+    # verify=False is unsecure. But for our purposes, is it?
+    r = requests.get('https://thenewstack.io', verify=False)
+
+    tree = fromstring(r.content)
+    links = tree.xpath('//div[@class="normalstory-box"]/header/h2/a/@href')
+
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    for link in links:
+        r = requests.get(link, verify=False)
+        tree = fromstring(r.content)
+        paras = tree.xpath('//div[@class="post-content"]/p')
+        paras = [para.text_content() for para in paras if para.text_content()]
+        para = random.choice(paras)
+        para = tokenizer.tokenize(para)
+        # To fix unicode issues:
+        para = [unicodedata.normalize('NFKD', text) for text in para]
+        for i in range(10):
+            text = random.choice(para)
+            if text and 60 < len(text) < 210:
+                break
+        else:
+            continue
+        yield '"%s" %s' % (text, link)
+
+
 def find_news(newsfuncs):
     """Interface to get news from different news scraping functions."""
     news_iterators = []

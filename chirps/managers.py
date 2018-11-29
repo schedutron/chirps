@@ -154,6 +154,8 @@ class AccountThread(threading.Thread):
                         except StopIteration:
                             news = functions.find_news(self.scrape)
                             item = next(news)
+                        # If it's a tuple, it contains media link, that's the
+                        # protocol we follow.
                         if isinstance(item, tuple):
                             content = item[0]
                         else:
