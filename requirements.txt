@@ -2,7 +2,7 @@ appdirs==1.4.0
 certifi==2017.7.27.1
 chardet==3.0.4
 idna==2.6
-lxml==4.0.0
+lxml
 packaging==16.8
 psycopg2==2.7.3.2
 PyJWT==1.5.3
@@ -13,5 +13,5 @@ requests>=2.20.0
 six==1.11.0
 twilio==6.8.4
 twitter==1.17.1
-urllib3==1.22
+urllib3>=1.23
 nltk
