@@ -1,5 +1,13 @@
 """This script contains useful functions for building the Twitter bot.
-It also has scrapers for building the information feed."""
+It also has scrapers for building the information feed.
+
+The scraping mechanism used here is versatile (and can be improved further).
+A wide array of tasks can be implemented by adding just more scraper functions.
+For example, a Wikipedia-edits bot can be created merely by adding a relevant
+Wikipedia scraper (implemented as a generator) and having a timeout in the
+find_news() method that prioritizes the wikipedia edits scraper above other
+scraper.
+"""
 
 import json
 import random
