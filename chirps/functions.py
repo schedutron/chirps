@@ -161,6 +161,7 @@ def scrape_themerkle(num_pages=17):
         tree = fromstring(r.content)
         collection = tree.xpath("//h2[@class='title front-view-title']/a/@href")
         links.extend(collection)
+    del tree
 
     for link in links:
         r = requests.get(link)
@@ -180,6 +181,8 @@ def scrape_udacity():
     url = 'https://blog.udacity.com/%s/%s' % (now.year, now.month)
     r = requests.get(url, headers=HEADERS)
     tree = fromstring(r.content)
+    del tree
+
     links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
     for link in links:
         r = requests.get(link, headers=HEADERS)
@@ -198,6 +201,7 @@ def scrape_coursera():
     r = requests.get(url, headers=HEADERS)
     tree = fromstring(r.content)
     links = tree.xpath('//div[@class="recent"]//div[@class="title"]/a/@href')
+    del tree
 
     for link in links:
         r = requests.get(link, headers=HEADERS)
@@ -239,23 +243,15 @@ def scrape_thenewstack():
 
     tree = fromstring(r.content)
     links = tree.xpath('//div[@class="normalstory-box"]/header/h2/a/@href')
+    del tree
 
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
     for link in links:
         r = requests.get(link, verify=False)
         tree = fromstring(r.content)
         paras = tree.xpath('//div[@class="post-content"]/p')
-        paras = [para.text_content() for para in paras if para.text_content()]
-        para = random.choice(paras)
-        para = tokenizer.tokenize(para)
-        # To fix unicode issues:
-        para = [unicodedata.normalize('NFKD', text) for text in para]
-        for i in range(10):
-            text = random.choice(para)
-            if text and 60 < len(text) < 210:
-                break
-        else:
-            continue
+        para = extract_paratext(paras)
+        text = extract_text(para)
+
         yield '"%s" %s' % (text, link)
 
 
