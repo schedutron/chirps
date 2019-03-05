@@ -80,7 +80,7 @@ class StreamThread(threading.Thread):
                 # Loop shouldn't stop if error occurs, and exception should be
                 # logged.
                 print(json.dumps(tweet, indent=4))
-                print(exception)
+                print(traceback.print_tb(exception.__traceback__))
                 print('-*-'*33)
 
 
