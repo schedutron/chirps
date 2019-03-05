@@ -29,6 +29,8 @@ parser.add_argument("--retweet", help="flag to enable retweeting",
                     action="store_true")
 parser.add_argument("--follow", help="flag to enable following people",
                     action="store_true")
+parser.add_argument("--follow_limit", help="maximum number of people to follow",
+                    default=4000, type=int)
 parser.add_argument("--scrape", help="flag to specify content scraping",
                     default="", nargs="*")
 args = parser.parse_args()
@@ -63,7 +65,7 @@ def main():
     account_manager = managers.AccountThread(ACCOUNT_HANDLER, UPLOAD_HANDLER,
                                              url, args.rate, args.fav,
                                              args.retweet, args.follow,
-                                             args.scrape)
+                                             args.follow_limit, args.scrape)
     admin = managers.StreamThread(
         "Admin", ADMIN_HANDLER, ACCESS_SECRET, url, functions.admin_action)
     streamer.start()

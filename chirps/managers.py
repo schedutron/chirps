@@ -86,7 +86,7 @@ class StreamThread(threading.Thread):
 class AccountThread(threading.Thread):
     """Account thread manages favoriting, retweeting and following people who
     tweet interesting stuff."""
-    def __init__(self, handler, upload_handler, url, sleep_time, fav, retweet, follow, scrape):
+    def __init__(self, handler, upload_handler, url, sleep_time, fav, retweet, follow, follow_limit, scrape):
         threading.Thread.__init__(self)
         self.handler = handler
         self.upload_handler = upload_handler
@@ -98,6 +98,7 @@ class AccountThread(threading.Thread):
         self.fav = fav
         self.retweet = retweet
         self.follow = follow
+        self.follow_limit = follow_limit
         self.scrape = scrape
         print('sleep_time: %s, fav: %s, retweet: %s, follow: %s, scrape: %s' %
               (self.sleep_time, self.fav, self.retweet, self.follow, self.scrape)
@@ -120,7 +121,7 @@ class AccountThread(threading.Thread):
 
             if self.follow:
                 friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
-                if len(friends_ids) > 4000:
+                if len(friends_ids) > follow_limit:
 
                     # To unfollow old follows because Twitter doesn't allow a large
                     # following / followers ratio for people with less followers.
