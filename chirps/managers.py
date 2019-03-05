@@ -86,6 +86,7 @@ class StreamThread(threading.Thread):
 class AccountThread(threading.Thread):
     """Account thread manages favoriting, retweeting and following people who
     tweet interesting stuff."""
+    # Since there are too many arguments, use kwargs instead.
     def __init__(self, handler, upload_handler, url, sleep_time, fav, retweet, follow, follow_limit, scrape):
         threading.Thread.__init__(self)
         self.handler = handler
@@ -100,9 +101,11 @@ class AccountThread(threading.Thread):
         self.follow = follow
         self.follow_limit = follow_limit
         self.scrape = scrape
-        print('sleep_time: %s, fav: %s, retweet: %s, follow: %s, scrape: %s' %
-              (self.sleep_time, self.fav, self.retweet, self.follow, self.scrape)
-             )
+        print('sleep_time: %s, fav: %s, retweet: %s, follow: %s,'
+              'follow_limit: %s, scrape: %s' %
+              (self.sleep_time, self.fav, self.retweet, self.follow, self.follow_limit,
+              self.scrape)
+            )
 
     def run(self):
         """Main loop to handle account retweets, follows, and likes."""
