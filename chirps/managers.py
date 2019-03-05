@@ -56,12 +56,13 @@ class StreamThread(threading.Thread):
         print(self.identifier, "started.")
         if self.identifier == 'Streamer':
             rel_name = 'accounts'
-            print("Tracking:", end=" ")
         else:
             rel_name = 'admins'
-            print("Admins:", end=" ")
         accounts = functions.get_accounts(self.db_access, rel_name)
-        print(accounts)
+        print("%s: %s" % (
+            "Tracking" if self.identifier == "Streamer" else "Admins",
+            accounts)
+        )
         listener = self.stream_handler.statuses.filter(
             follow=','.join([str(account) for account in accounts])
         )
@@ -101,7 +102,7 @@ class AccountThread(threading.Thread):
         self.follow = follow
         self.follow_limit = follow_limit
         self.scrape = scrape
-        print('sleep_time: %s, fav: %s, retweet: %s, follow: %s,'
+        print('sleep_time: %s, fav: %s, retweet: %s, follow: %s, '
               'follow_limit: %s, scrape: %s' %
               (self.sleep_time, self.fav, self.retweet, self.follow, self.follow_limit,
               self.scrape)
@@ -124,7 +125,7 @@ class AccountThread(threading.Thread):
 
             if self.follow:
                 friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
-                if len(friends_ids) > follow_limit:
+                if len(friends_ids) > self.follow_limit:
 
                     # To unfollow old follows because Twitter doesn't allow a large
                     # following / followers ratio for people with less followers.
