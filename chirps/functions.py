@@ -169,10 +169,8 @@ def scrape_themerkle(num_pages=17):
         paras = tree.xpath('//div[@class="thecontent"]/p')
         para = extract_paratext(paras)
         text = extract_text(para)
-        if not text:
-            continue
-
-        yield '"%s" %s' % (text, link)
+        if text is not None:
+            yield '"%s" %s' % (text, link)
 
 
 def scrape_udacity():
@@ -190,9 +188,8 @@ def scrape_udacity():
         paras = blog_tree.xpath('//div[@id="quotablecontent"]/p')
         para = extract_paratext(paras)  # Gets a random paragraph.
         text = extract_text(para)  # Gets a good-enough random text quote.
-        if not text:
-            continue
-        yield '"%s" %s' % (text, link)
+        if text is not None:
+            yield '"%s" %s' % (text, link)
 
 
 def scrape_coursera():
@@ -209,10 +206,8 @@ def scrape_coursera():
         paras = blog_tree.xpath('//div[@class="entry-content"]/p')
         para = extract_paratext(paras)  # Gets a random paragraph.
         text = extract_text(para)  # Gets a good-enough random text quote.
-        if not text:
-            continue
-        
-        yield '"%s" %s' % (text, link)
+        if text is not None:
+            yield '"%s" %s' % (text, link)
 
 
 def scrape_classcentral():
@@ -229,30 +224,27 @@ def scrape_classcentral():
         paras = blog_tree.xpath('//div[@class="entry-content"]/p')
         para = extract_paratext(paras)  # Gets a random paragraph.
         text = extract_text(para)  # Gets a good-enough random text quote.
-
-        if not text:
-            continue
-        
-        yield '"%s" %s' % (text, link)
+        if text is not None:
+            yield '"%s" %s' % (text, link)
 
 
 def scrape_thenewstack():
     """Scrapes news from thenewstack.io"""
     # verify=False is unsecure. But for our purposes, is it?
-    r = requests.get('https://thenewstack.io', verify=False)
+    r = requests.get('https://thenewstack.io')
 
     tree = fromstring(r.content)
     links = tree.xpath('//div[@class="normalstory-box"]/header/h2/a/@href')
     del tree
 
     for link in links:
-        r = requests.get(link, verify=False)
+        r = requests.get(link)
         tree = fromstring(r.content)
         paras = tree.xpath('//div[@class="post-content"]/p')
         para = extract_paratext(paras)
         text = extract_text(para)
-
-        yield '"%s" %s' % (text, link)
+        if text is not None:
+            yield '"%s" %s' % (text, link)
 
 
 def find_news(newsfuncs):
