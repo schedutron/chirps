@@ -139,7 +139,8 @@ def get_tech_news():  # I'm adventuring with regular expressions for parsing!
     latest_expr = re.compile(
         r'(?s)<section id="stream-panel".*ol>(.*)</ol>'
     )
-    nyTech = requests.get('https://nytimes.com/section/technology')
+    nyTech = requests.get(
+        'https://nytimes.com/section/technology', headers=HEADERS)
     latest = latest_expr.search(nyTech.text)
     news_blocks = news_block_expr.findall(latest.group(1))
 
