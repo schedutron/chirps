@@ -7,6 +7,7 @@ import json
 from math import ceil
 import random
 import re
+from string import ascii_letters
 import time
 import threading
 import traceback
@@ -171,26 +172,36 @@ class AccountThread(threading.Thread):
                         if not re.search(
                             r'(?i)this|follow|search articles', content
                             ):
-                            print("Scraped: ", content)
 
                             # Extract quote sentence from content.
-                            quote = content[:content.find('http')-1]
-                            keywords_scores = rake.extract_keywords_from_text(quote)
+                            quote = content[:content.find('http')-1]  # Can be better.
+                            rake.extract_keywords_from_text(quote)
+                            keywords_scores = rake.get_word_degrees()
                             keywords_list = sorted(
                                 keywords_scores.items(),
                                 key=lambda x: x[1],
-                                reverse=True)
+                                reverse=True
+                            )
                             keywords = [
-                                pair[i][0] for i in range(
+                                keywords_list[i][0] for i in range(
                                     ceil(len(keywords_list)//3)
                                     )
-                                ]  # extract top 33% most prominent keywords.
+                                ]  # Extract top 33% most prominent keywords.
                             # There won't be a lot of keywords, so we just
                             # use the following naive algorithm to convert
                             # content keywords to hashtags.
                             for keyword in keywords:
-                                index = content.find(keyword)
+                                # Following loop is used to avoid character
+                                # sequences like '."', ',"', ...
+                                for char in ascii_letters:
+                                    if char in keyword:
+                                        break
+                                else:
+                                    continue
+                                # All keywords are lowercase.
+                                index = content.lower().find(keyword)
                                 content = content[:index] + '#' + content[index:]
+                            print("Scraped: ", content)
 
                             # This uploads the relevant photo and gets it's
                             # id for attachment in tweet.
@@ -200,7 +211,7 @@ class AccountThread(threading.Thread):
                                     )["media_id_string"]
 
                                 self.handler.statuses.update(
-                                    status=item[0],
+                                    status=content,
                                     media_ids=photo_id
                                     )
                             else:
