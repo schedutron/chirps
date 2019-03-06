@@ -4,6 +4,7 @@ and responding to Twitter info.
 """
 
 import json
+from math import ceil
 import random
 import re
 import time
@@ -11,6 +12,7 @@ import threading
 import traceback
 from urllib import parse  # For database connection/
 
+from rake_nltk import Rake
 import requests
 # Useful functions for Twitter and scraping stuff.
 import chirps.functions as functions
@@ -114,6 +116,7 @@ class AccountThread(threading.Thread):
         print("Account Manager started.")
         news = functions.find_news(self.scrape)
         subtract_string = ' -from:%s' % screen_name  # For not extracting self's tweets.
+        rake = Rake()  # To be used for extracting keywords from scraped content.
         while True:
             cur = functions.get_cursor(self.db_access)
             word = functions.get_keyword(cur)
@@ -169,6 +172,25 @@ class AccountThread(threading.Thread):
                             r'(?i)this|follow|search articles', content
                             ):
                             print("Scraped: ", content)
+
+                            # Extract quote sentence from content.
+                            quote = content[:content.find('http')-1]
+                            keywords_scores = rake.extract_keywords_from_text(quote)
+                            keywords_list = sorted(
+                                keywords_scores.items(),
+                                key=lambda x: x[1],
+                                reverse=True)
+                            keywords = [
+                                pair[i][0] for i in range(
+                                    ceil(len(keywords_list)//3)
+                                    )
+                                ]  # extract top 33% most prominent keywords.
+                            # There won't be a lot of keywords, so we just
+                            # use the following naive algorithm to convert
+                            # content keywords to hashtags.
+                            for keyword in keywords:
+                                index = content.find(keyword)
+                                content = content[:index] + '#' + content[index:]
 
                             # This uploads the relevant photo and gets it's
                             # id for attachment in tweet.
