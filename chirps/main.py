@@ -6,6 +6,13 @@ Main Twitter bot script which glues everything together and starts the managers.
 import os
 import argparse
 from urllib import parse
+
+# nltk is only used for downloading relevant files here, but it is used
+# directly in other functions.py
+import nltk
+nltk.download('stopwords')  # Used for eliminating stopwords.
+nltk.download('punkt')  # Used for tokenizing paragraphs.
+
 from twitter import Twitter, OAuth, TwitterStream
 # Useful boilerplate functions for the overall Twitter bot.
 import chirps.functions as functions

@@ -21,7 +21,6 @@ import psycopg2  # We're using postgres as our database system.
 import requests
 from lxml.html import fromstring
 import nltk  # Used here to split paragraphs into sentences.
-nltk.download('punkt')
 from twitter import TwitterHTTPError
 
 # tokenizer is used in scraping.
