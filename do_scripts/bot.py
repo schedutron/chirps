@@ -107,7 +107,7 @@ def main():
                 tweet = next(iterator)
                 t.statuses.update(status=tweet)
                 print(tweet, end='\n')
-                time.sleep(10)  # Sleep for 10 minutes.
+                time.sleep(600)  # Sleep for 10 minutes.
             except StopIteration:
                 news_iterators[i] = globals()[newsfuncs[i]]()
 
