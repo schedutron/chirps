@@ -9,9 +9,13 @@ Scraping done with the help of [Kenneth Reitz](https://github.com/kennethreitz)'
 
 ## Prerequisites
 
-This bot framework is built in Python, so make sure Python 3.x is installed on your system. Once Python is installed, create a virtual environment in the root directory of this repo using `python3 -m venv bot`. Then activate this virtual environment using
+This bot framework is built in Python, so make sure Python 3.x is installed on your system. Once Python is installed, create a virtual environment in the root directory of this repo using the following command:
 
-```$ source bot/bin activate```
+```$ python3 -m venv bot```
+
+Then activate this virtual environment using:
+
+```$ source bot/bin/activate``` (for Windows users this can look like `mkvirtualenv bot`)
 
 Now install the dependencies using the following command:
 
@@ -25,7 +29,7 @@ For bot deployment, this framework uses [Heroku](https://heroku.com), so you'll 
 
 ## Setting It Up
 
-After creating a new app on Heroku dashboard, use the following commands to add a new remote to this repository:
+After creating a new app on Heroku dashboard and installing the Heroku CLI on your machine, use the following commands to add a new remote to this repository:
 ```
 $ heroku login
 <enter your Heroku credentials>
