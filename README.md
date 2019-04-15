@@ -58,4 +58,16 @@ The bot setup is essentially complete once this script executes successfully. No
 worker: python3 -m chirps.main --rate=300 --fav --retweet --follow --follow_limit=6000 --scrape scrape_thenewstack get_tech_news
 ```
 
-For example, the above Procfile says "Tweet every 5 minutes (300 seconds), like (favorite) and follow tweets (those tweets that have keywords specified in `init_script.py`), keep following people tweeting about those keywords till your following count reaches 6000, and use scraper functions `scrape_thenewstack()` and `get_tech_news()` for aggregating content to be tweeted by your bot. You can build your own scraper functions in `scrapers.py` and tune other parameters as per your requirements.
+For example, the above Procfile says "Tweet every 5 minutes (300 seconds), like (favorite) and follow tweets (those tweets that have keywords specified in `init_script.py`), keep following people tweeting about those keywords till your following count reaches 6000, and use scraper functions `scrape_thenewstack()` and `get_tech_news()` for aggregating content to be tweeted by your bot. You can build your own tweet-er functions (usually scrapers) in `scrapers.py` (they should `return` or `yield` strings, which will be tweeted by your bot) and tune other parameters as per your requirements.
+
+Finally, deploy your bot using the following command:
+```
+$ git push heroku deploy:master
+```
+
+Once the deployment completes, "switch on" the bot as follows:
+```
+$ heroku ps:scale worker=1
+```
+
+Now your bot should be up and running!
