@@ -15,7 +15,7 @@ This bot framework is built in Python, so make sure Python 3.x is installed on y
 
 Then activate this virtual environment using:
 
-```$ source bot/bin/activate``` (for Windows users this can look like `mkvirtualenv bot`)
+```$ source bot/bin/activate``` (for Windows users this can look like `workon bot`)
 
 Now install the dependencies using the following command:
 
@@ -23,13 +23,13 @@ Now install the dependencies using the following command:
 $ pip install -r requirements.txt
 ```
 
-You will need a PostgreSQL database service ready, a good free service is [ElephantSQL](https://elephantsql.com). Once you've set up an empty database, save its url.
+You will need a PostgreSQL database service ready, a good free service is [ElephantSQL](https://elephantsql.com). Once you've set up an empty database, save its url (it'll be needed while running `init_script` below).
 
 For bot deployment, this framework uses [Heroku](https://heroku.com), so you'll also need a Heroku account.
 
 ## Setting It Up
 
-After creating a new app on Heroku dashboard and installing the Heroku CLI on your machine, use the following commands to add a new remote to this repository:
+After creating a new app on Heroku dashboard, install the Heroku CLI on your machine. Then use the following commands to add a new remote to this repository:
 ```
 $ heroku login
 <enter your Heroku credentials>
@@ -48,7 +48,7 @@ $ git checkout -b deploy
 Next, run the bot initialization script and enter the required information very carefully:
 
 ```
-$ python3 chirps/init_script.py
+$ python -m chirps.init_script <your database URL>
 ```
 
 The bot setup is essentially complete once this script executes successfully. Now you just need to "tune" certain options of the bot in the Heroku Procfile. Create a file named "Procfile" in the root of this repository and provide the configuration options as per your needs:
