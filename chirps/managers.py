@@ -128,8 +128,13 @@ class AccountThread(threading.Thread):
             print("Chosen word:", word)
 
             if self.follow:
+                friends_count = self.handler.users.show(screen_name=screen_name)["friends_count"]
                 friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
-                if len(friends_ids) > self.follow_limit:
+                print("Number of followers:")
+                print(friends_count)
+                print()
+                if friends_count > self.follow_limit:
+                    print("You've followed too many people! Unfollowing 1000 people.")
 
                     # To unfollow old follows because Twitter doesn't allow a large
                     # following / followers ratio for people with less followers.
