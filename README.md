@@ -42,7 +42,18 @@ $ heroku git:remote -a <your Heroku app name>
 
 Now create a new branch for this repository, name it "deploy" and check it out:
 ```
-$ git checkout -b deploy
+$ gi checkout -b deploy
+```
+
+Remove the `chirps/credentials.py` and `chirps/screen_name.py` entries from the `.gitignore` file. The file should now look like:
+
+```
+[.gitignore]
+.DS_Store
+.env
+bot/
+.vscode/
+chirps/__pycache__/
 ```
 
 Next, run the bot initialization script and enter the required information very carefully:
