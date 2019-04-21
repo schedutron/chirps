@@ -92,9 +92,9 @@ def scrape_udacity():
     url = 'https://blog.udacity.com/%s/%s' % (now.year, now.month)
     r = requests.get(url, headers=HEADERS)
     tree = fromstring(r.content)
+    links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
     del tree
 
-    links = tree.xpath('//div[@class="entry-content"]/p[last()]/a/@href')
     for link in links:
         r = requests.get(link, headers=HEADERS)
         blog_tree = fromstring(r.content)
