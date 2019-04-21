@@ -128,11 +128,10 @@ class AccountThread(threading.Thread):
             print("Chosen word:", word)
 
             if self.follow:
-                friends_count = self.handler.users.show(screen_name=screen_name)["friends_count"]
+                friends_count = int(self.handler.users.show(screen_name=screen_name)["friends_count"])
                 friends_ids = self.handler.friends.ids(screen_name=screen_name)["ids"]
-                print("Number of followers:")
-                print(friends_count)
-                print()
+                print("Number of followings:", friends_count)
+
                 if friends_count > self.follow_limit:
                     print("You've followed too many people! Unfollowing 1000 people.")
 
