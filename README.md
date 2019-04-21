@@ -82,3 +82,6 @@ $ heroku ps:scale worker=1
 ```
 
 Now your bot should be up and running!
+***
+
+If you want to dig deeper into the codebase and know more about the implementation of "generator-of-generators" function in `chirps/functions.py`, see [my tutorial on DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-scrape-web-pages-and-post-content-to-twitter-with-python-3) which explains that part in detail.
