@@ -15,7 +15,7 @@ This bot framework is built in Python, so make sure Python 3.x is installed on y
 
 Then activate this virtual environment using:
 
-```$ source bot/bin/activate``` (for Windows users this can look like `workon bot`)
+```$ source bot/bin/activate``` (for Windows users this can look like `workon bot`, see the relevant `virtualenv` documentation for exact usage)
 
 Now install the dependencies using the following command:
 
@@ -42,7 +42,7 @@ $ heroku git:remote -a <your Heroku app name>
 
 Now create a new branch for this repository, name it "deploy" and check it out:
 ```
-$ gi checkout -b deploy
+$ git checkout -b deploy
 ```
 
 Remove the `chirps/credentials.py` and `chirps/screen_name.py` entries from the `.gitignore` file. The file should now look like:
