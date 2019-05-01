@@ -26,7 +26,7 @@ except ModuleNotFoundError:
     screen_name = os.environ['SCREEN_NAME']
 
 # Perhaps using a database would be better if frequent updation is needed.
-# This gets links to files containing relevant data.
+
 # Add hashtabgs to tweets - they generate more views.
 # Simply use Twitter to add keywords to the database instead of using Dropbox.
 # Move fast and break things!
@@ -54,8 +54,7 @@ class StreamThread(threading.Thread):
 
     def run(self):
         """This is the function for main listener loop."""
-        # TBD: Add periodic data checks to get updated data for messages, bads.
-        # Listen to bad people.
+        # TBD: Add periodic data checks to get updated data for messages.
         print(self.identifier, "started.")
         if self.identifier == 'Streamer':
             rel_name = 'accounts'
@@ -78,7 +77,7 @@ class StreamThread(threading.Thread):
                     # we have to ensure that the id is the person we're tracking. Maybe 'in' isn't good for that. 
                     continue
                 kwargs = {'tweet': tweet, 'handler': self.handler, 'db_access': self.db_access}
-                self.action_func(kwargs)  # Note the nontraditional use of kwargs here.
+                self.action_func(kwargs)  # Note the nontraditional use of kwargs here. Fix it soon.
             except Exception as exception:
                 # Loop shouldn't stop if error occurs, and exception should be
                 # logged.
@@ -123,7 +122,7 @@ class AccountThread(threading.Thread):
             word = functions.get_keyword(cur)
             # Add '-from:TheRealEqualizer' in the following line.
             tweets = self.handler.search.tweets(
-                q=word+subtract_string, count=100,
+                q=word+subtract_string, count=25,
                 lang="en")["statuses"]  # Understand OR operator.
             print("Chosen word:", word)
 
