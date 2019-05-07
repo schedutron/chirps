@@ -24,7 +24,7 @@ import threading
 import time
 from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 import webbrowser
-
+''' parser used here'''
 parser = html.parser.HTMLParser()  # Used in find_news()
 
 # Following offensive compilation is not my stuff.
