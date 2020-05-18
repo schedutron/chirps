@@ -7,6 +7,10 @@ Twitter bot powering www.twitter.com/arichduvet
 Uses [@sixohsix](https://github.com/sixohsix)'s Python-based Twitter API for posting and other actions.
 Scraping done with the help of [Kenneth Reitz](https://github.com/kennethreitz)'s `requests` module and some rudimentary regular expressions.
 
+A poster on this project was presented at [PyCon US 2019](https://us.pycon.org/2019/schedule/presentation/123/) by me and at [EuroPython 2019](https://ep2019.europython.eu/talks/mEhwsud-chirps-a-twitter-bot-framework-written-in-python/) by my friend [Parth](https://github.com/ParthS007) (because of my absence due to ongoing internship):
+
+![Chirps: A Twitter Bot Framework Written in Python](https://dl.dropboxusercontent.com/s/1ivzrw1jarsz2sa/ChirpsATwitterBotGenerator%20Final_page-0001-min.jpg?dl=0)
+***
 ## Prerequisites
 
 This bot framework is built in Python, so make sure Python 3.x is installed on your system. Once Python is installed, create a virtual environment in the root directory of this repo using the following command:
