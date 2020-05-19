@@ -24,7 +24,7 @@ Then activate this virtual environment using:
 Now install the dependencies using the following command:
 
 ```
-$ pip install -r requirements.txt
+$ pip install -r requirements.txt --no-cache-dir
 ```
 
 You will need a PostgreSQL database service ready, a good free service is [ElephantSQL](https://elephantsql.com). Once you've set up an empty database, save its url (it'll be needed while running `init_script` below).
