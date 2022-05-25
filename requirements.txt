@@ -5,7 +5,7 @@ idna==2.6
 lxml
 packaging==16.8
 psycopg2==2.7.3.2
-PyJWT==1.5.3
+PyJWT==2.4.0
 pyparsing==2.1.10
 PySocks==1.6.7
 pytz==2017.3
